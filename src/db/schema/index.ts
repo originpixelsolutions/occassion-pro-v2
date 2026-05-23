@@ -1,10 +1,20 @@
 /**
- * Schema barrel. Add each table file here as it lands.
- * Order does not matter at runtime; FK ordering is enforced by the
- * hand-written migration files in `supabase/migrations/`.
+ * Schema barrel. One export per table file. Order doesn't matter at
+ * runtime; FK ordering is enforced by the hand-written migration files
+ * in supabase/migrations/.
  */
 export * from './super-admins.js';
 export * from './super-admin-role-permissions.js';
+export * from './super-admin-approvals.js';
 export * from './platform-settings.js';
 export * from './platform-theme-config.js';
 export * from './platform-theme-history.js';
+export * from './subscription-plans.js';
+export * from './feature-flags.js';
+export * from './catalogs.js';
+export * from './event-types.js';
+export * from './event-templates.js';
+export * from './currency-rates.js';
+export * from './whatsapp-templates.js';
+export * from './security-monitoring.js';
+export * from './help-content.js';

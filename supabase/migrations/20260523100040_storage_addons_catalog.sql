@@ -1,0 +1,16 @@
+-- 0009_storage_addons_catalog | Phase 1 | spec 3.12
+CREATE TABLE storage_addons_catalog (
+  id                uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  code              text        UNIQUE NOT NULL CHECK (length(trim(code)) > 0),
+  name              text        NOT NULL CHECK (length(trim(name)) > 0),
+  extra_gb          integer     NOT NULL CHECK (extra_gb > 0),
+  price_inr_monthly numeric(10,2) CHECK (price_inr_monthly IS NULL OR price_inr_monthly >= 0),
+  price_inr_yearly  numeric(10,2) CHECK (price_inr_yearly  IS NULL OR price_inr_yearly  >= 0),
+  price_usd_monthly numeric(10,2) CHECK (price_usd_monthly IS NULL OR price_usd_monthly >= 0),
+  price_usd_yearly  numeric(10,2) CHECK (price_usd_yearly  IS NULL OR price_usd_yearly  >= 0),
+  status            text        NOT NULL DEFAULT 'active' CHECK (status IN ('active','archived')),
+  created_at        timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_storage_addons_catalog_status ON storage_addons_catalog (status) WHERE status = 'active';
+ALTER TABLE storage_addons_catalog ENABLE ROW LEVEL SECURITY;
+ALTER TABLE storage_addons_catalog FORCE ROW LEVEL SECURITY;
