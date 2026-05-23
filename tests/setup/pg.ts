@@ -21,9 +21,7 @@ export async function setupTestDb() {
   await db.waitReady;
 
   // Apply all migrations in lexical order — same order Supabase CLI uses.
-  const files = (await readdir(MIGRATIONS_DIR))
-    .filter((f) => f.endsWith('.sql'))
-    .sort();
+  const files = (await readdir(MIGRATIONS_DIR)).filter((f) => f.endsWith('.sql')).sort();
   for (const file of files) {
     const sql = await readFile(join(MIGRATIONS_DIR, file), 'utf8');
     await db.exec(sql);

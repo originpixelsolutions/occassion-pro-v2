@@ -1,13 +1,5 @@
 import { sql } from 'drizzle-orm';
-import {
-  pgTable,
-  text,
-  boolean,
-  timestamp,
-  primaryKey,
-  index,
-  check,
-} from 'drizzle-orm/pg-core';
+import { pgTable, text, boolean, timestamp, primaryKey, index, check } from 'drizzle-orm/pg-core';
 import { SUPER_ADMIN_ROLES, type SuperAdminRole } from './super-admins.js';
 
 /**
@@ -44,10 +36,7 @@ export const superAdminRolePermissions = pgTable(
       'sarp_role_check',
       sql`${t.role} IN ('owner','admin','engineering','support','sales','finance','auditor')`,
     ),
-    capabilityCheck: check(
-      'sarp_capability_check',
-      sql`length(trim(${t.capability})) > 0`,
-    ),
+    capabilityCheck: check('sarp_capability_check', sql`length(trim(${t.capability})) > 0`),
     capabilityGrantedIdx: index('idx_sarp_capability_granted')
       .on(t.capability)
       .where(sql`${t.granted} = true`),

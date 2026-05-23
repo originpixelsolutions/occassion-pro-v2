@@ -4,3 +4,6 @@
  * hand-written migration files in `supabase/migrations/`.
  */
 export * from './super-admins.js';
+export * from './super-admin-role-permissions.js';
+export * from './platform-settings.js';
+export * from './platform-theme-config.js';

@@ -1,11 +1,5 @@
 import { sql } from 'drizzle-orm';
-import {
-  pgTable,
-  smallint,
-  boolean,
-  timestamp,
-  check,
-} from 'drizzle-orm/pg-core';
+import { pgTable, smallint, boolean, timestamp, check } from 'drizzle-orm/pg-core';
 
 /**
  * platform_settings — Phase 1, Unit 3.

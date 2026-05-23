@@ -1,0 +1,29 @@
+# Cloudflare Workers + Pages config. Spec ref: Part 20.1 (Environments).
+# Worker code lives in workers/ (lands in Phase 2). For now this file
+# carves out per-env names + bindings so CI can validate it.
+
+name = "occasionpro-api"
+main = "workers/api/src/index.ts"
+compatibility_date = "2026-05-23"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+APP_ENV = "local"
+
+[env.dev]
+name = "occasionpro-api-dev"
+route = { pattern = "api.dev.occasionpro.in/*", zone_name = "occasionpro.in" }
+[env.dev.vars]
+APP_ENV = "dev"
+
+[env.staging]
+name = "occasionpro-api-staging"
+route = { pattern = "api.staging.occasionpro.in/*", zone_name = "occasionpro.in" }
+[env.staging.vars]
+APP_ENV = "staging"
+
+[env.production]
+name = "occasionpro-api"
+route = { pattern = "api.occasionpro.in/*", zone_name = "occasionpro.in" }
+[env.production.vars]
+APP_ENV = "production"

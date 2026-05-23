@@ -140,29 +140,26 @@ describe('super_admins — schema correctness (Phase 1, Unit 1)', () => {
   // -------------------------------------------------------------------------
 
   it('rejects a missing email', async () => {
-    const err = await tryExec(
-      db,
-      `INSERT INTO super_admins (full_name, role) VALUES ($1, $2)`,
-      ['No Email', 'owner'],
-    );
+    const err = await tryExec(db, `INSERT INTO super_admins (full_name, role) VALUES ($1, $2)`, [
+      'No Email',
+      'owner',
+    ]);
     expect(err).toMatch(/email.*null|null.*email/i);
   });
 
   it('rejects a missing full_name', async () => {
-    const err = await tryExec(
-      db,
-      `INSERT INTO super_admins (email, role) VALUES ($1, $2)`,
-      ['noname@y.dev', 'owner'],
-    );
+    const err = await tryExec(db, `INSERT INTO super_admins (email, role) VALUES ($1, $2)`, [
+      'noname@y.dev',
+      'owner',
+    ]);
     expect(err).toMatch(/full_name.*null|null.*full_name/i);
   });
 
   it('rejects a missing role', async () => {
-    const err = await tryExec(
-      db,
-      `INSERT INTO super_admins (email, full_name) VALUES ($1, $2)`,
-      ['norole@y.dev', 'No Role'],
-    );
+    const err = await tryExec(db, `INSERT INTO super_admins (email, full_name) VALUES ($1, $2)`, [
+      'norole@y.dev',
+      'No Role',
+    ]);
     expect(err).toMatch(/role.*null|null.*role/i);
   });
 
@@ -202,9 +199,7 @@ describe('super_admins — schema correctness (Phase 1, Unit 1)', () => {
       [before.id],
     );
     const row = result.rows[0]!;
-    expect(new Date(row.updated_at).getTime()).toBeGreaterThan(
-      new Date(row.created_at).getTime(),
-    );
+    expect(new Date(row.updated_at).getTime()).toBeGreaterThan(new Date(row.created_at).getTime());
   });
 
   // -------------------------------------------------------------------------
@@ -243,11 +238,11 @@ describe('super_admins — schema correctness (Phase 1, Unit 1)', () => {
 
   it('RLS: anon cannot INSERT either (default-deny is total)', async () => {
     const err = await withRole(db, 'anon', () =>
-      tryExec(
-        db,
-        `INSERT INTO super_admins (email, full_name, role) VALUES ($1, $2, $3)`,
-        ['anon-insert@y.dev', 'No', 'owner'],
-      ),
+      tryExec(db, `INSERT INTO super_admins (email, full_name, role) VALUES ($1, $2, $3)`, [
+        'anon-insert@y.dev',
+        'No',
+        'owner',
+      ]),
     );
     expect(err).toMatch(/row-level security|policy|permission/i);
   });

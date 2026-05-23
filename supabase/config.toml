@@ -1,0 +1,34 @@
+# Supabase CLI config. Per-env project refs live in
+# `supabase/environments/<env>.toml` and are merged by the CLI at deploy
+# time. Spec ref: Part 20.1 (Environments).
+
+project_id = "occasionpro-dev"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.migrations]
+# Strict timestamped naming per Part 20.3.
+schema_paths = ["./supabase/migrations"]
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://dev.occasionpro.in", "https://staging.occasionpro.in", "https://app.occasionpro.in"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"

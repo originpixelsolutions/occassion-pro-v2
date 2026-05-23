@@ -1,0 +1,6 @@
+# OccasionPro CODEOWNERS — solo founder regime.
+# Replace @hariprathish with the actual GitHub handle once the repo exists.
+*           @hariprathish
+*.sql       @hariprathish
+src/db/**   @hariprathish
+.github/**  @hariprathish

@@ -1,0 +1,4 @@
+# staging env overrides. Project ref + URL filled in by the user when the
+# Supabase project is created via the dashboard or CLI.
+project_id = "occasionpro-staging"
+# project_ref = "<fill in from Supabase dashboard>"

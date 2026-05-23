@@ -1,0 +1,14 @@
+{
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "printWidth": 100,
+  "tabWidth": 2,
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "bracketSpacing": true,
+  "overrides": [
+    { "files": "*.md", "options": { "printWidth": 80, "proseWrap": "always" } },
+    { "files": "*.sql", "options": { "printWidth": 120 } }
+  ]
+}

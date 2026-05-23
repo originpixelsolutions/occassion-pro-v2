@@ -91,9 +91,7 @@ describe('platform_settings — schema correctness (Phase 1, Unit 3)', () => {
     const r = await db.query<{
       sole_operator_mode: boolean;
       sole_operator_disabled_at: string | null;
-    }>(
-      `SELECT sole_operator_mode, sole_operator_disabled_at FROM platform_settings WHERE id = 1`,
-    );
+    }>(`SELECT sole_operator_mode, sole_operator_disabled_at FROM platform_settings WHERE id = 1`);
     expect(r.rows[0]!.sole_operator_mode).toBe(false);
     expect(r.rows[0]!.sole_operator_disabled_at).not.toBeNull();
   });
@@ -140,10 +138,7 @@ describe('platform_settings — schema correctness (Phase 1, Unit 3)', () => {
 
   it('RLS: anon cannot UPDATE either (default-deny is total)', async () => {
     const err = await withRole(db, 'anon', () =>
-      tryExec(
-        db,
-        `UPDATE platform_settings SET sole_operator_mode = false WHERE id = 1`,
-      ),
+      tryExec(db, `UPDATE platform_settings SET sole_operator_mode = false WHERE id = 1`),
     );
     // anon doesn't see the row, so UPDATE matches 0 rows but should also
     // not be able to bypass RLS via a row-targeted WHERE.

@@ -1,0 +1,117 @@
+# OccasionPro CI — Deploy Gate (Part 20.2 of the master plan).
+#
+# Red gate = no deploy. Branch protection on `main` requires this workflow to
+# be green plus 1 approval + up-to-date + squash-only.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-format:
+    name: Lint, format & SQLFluff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: Prettier check
+        run: npm run format:check
+      - name: SQLFluff (Postgres dialect)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install sqlfluff==3.2.5
+      - run: npm run lint:sql
+
+  typecheck:
+    name: tsc --noEmit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    name: Unit + Integration + RLS tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Vitest (constraint + RLS pair coverage)
+        run: npm run test
+
+  audit:
+    name: npm audit + Trivy filesystem scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high
+      - name: Trivy fs scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+
+  migration-dryrun:
+    name: Migration dry-run (pglite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Apply every migration in order against pglite
+        run: |
+          node --input-type=module -e "
+            import { PGlite } from '@electric-sql/pglite';
+            import { citext } from '@electric-sql/pglite/contrib/citext';
+            import { readdir, readFile } from 'node:fs/promises';
+            const db = new PGlite({ extensions: { citext } });
+            await db.waitReady;
+            const dir = 'supabase/migrations';
+            const files = (await readdir(dir)).filter(f => f.endsWith('.sql')).sort();
+            for (const f of files) {
+              const sql = await readFile(\`\${dir}/\${f}\`, 'utf8');
+              try { await db.exec(sql); console.log('OK', f); }
+              catch (e) { console.error('FAIL', f, e.message); process.exit(1); }
+            }
+          "
+
+  gate:
+    name: Deploy gate
+    needs: [lint-format, typecheck, test, audit, migration-dryrun]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "All gates green."

@@ -1,0 +1,4 @@
+# production env overrides. Project ref + URL filled in by the user when the
+# Supabase project is created via the dashboard or CLI.
+project_id = "occasionpro-production"
+# project_ref = "<fill in from Supabase dashboard>"

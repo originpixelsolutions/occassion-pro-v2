@@ -1,13 +1,5 @@
 import { sql } from 'drizzle-orm';
-import {
-  pgTable,
-  integer,
-  text,
-  timestamp,
-  uuid,
-  index,
-  check,
-} from 'drizzle-orm/pg-core';
+import { pgTable, integer, text, timestamp, uuid, index, check } from 'drizzle-orm/pg-core';
 import { superAdmins } from './super-admins.js';
 
 /**
@@ -94,19 +86,12 @@ export const platformThemeConfig = pgTable(
   },
   (t) => ({
     singletonCheck: check('ptc_singleton', sql`${t.id} = 1`),
-    gradientAngleCheck: check(
-      'ptc_gradient_angle',
-      sql`${t.brandGradientAngle} BETWEEN 0 AND 360`,
-    ),
-    themeModeCheck: check(
-      'ptc_theme_mode',
-      sql`${t.defaultThemeMode} IN ('light','dark','auto')`,
-    ),
-    statusCheck: check(
-      'ptc_status',
-      sql`${t.status} IN ('draft','staged','live','rollback')`,
-    ),
-    draftByIdx: index('idx_ptc_draft_by').on(t.draftBy).where(sql`${t.draftBy} IS NOT NULL`),
+    gradientAngleCheck: check('ptc_gradient_angle', sql`${t.brandGradientAngle} BETWEEN 0 AND 360`),
+    themeModeCheck: check('ptc_theme_mode', sql`${t.defaultThemeMode} IN ('light','dark','auto')`),
+    statusCheck: check('ptc_status', sql`${t.status} IN ('draft','staged','live','rollback')`),
+    draftByIdx: index('idx_ptc_draft_by')
+      .on(t.draftBy)
+      .where(sql`${t.draftBy} IS NOT NULL`),
     approvedByIdx: index('idx_ptc_approved_by')
       .on(t.approvedBy)
       .where(sql`${t.approvedBy} IS NOT NULL`),

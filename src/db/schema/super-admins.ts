@@ -1,13 +1,5 @@
 import { sql } from 'drizzle-orm';
-import {
-  pgTable,
-  uuid,
-  text,
-  timestamp,
-  uniqueIndex,
-  index,
-  check,
-} from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, uniqueIndex, index, check } from 'drizzle-orm/pg-core';
 import { citext, inetArray } from '../columns.js';
 
 /**
@@ -68,10 +60,7 @@ export const superAdmins = pgTable(
       'super_admins_role_check',
       sql`${t.role} IN ('owner','admin','engineering','support','sales','finance','auditor')`,
     ),
-    fullNameCheck: check(
-      'super_admins_full_name_check',
-      sql`length(trim(${t.fullName})) > 0`,
-    ),
+    fullNameCheck: check('super_admins_full_name_check', sql`length(trim(${t.fullName})) > 0`),
     recoveryPhoneCheck: check(
       'super_admins_recovery_phone_check',
       sql`${t.recoveryPhone} IS NULL OR ${t.recoveryPhone} ~ '^\\+[1-9][0-9]{6,14}$'`,

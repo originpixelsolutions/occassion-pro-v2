@@ -85,9 +85,7 @@ describe('platform_theme_config — schema correctness (Phase 1, Unit 4)', () =>
   });
 
   it('accepts a valid 6-digit hex with mixed case', async () => {
-    await db.query(
-      `UPDATE platform_theme_config SET brand_primary = '#aBcDeF' WHERE id = 1`,
-    );
+    await db.query(`UPDATE platform_theme_config SET brand_primary = '#aBcDeF' WHERE id = 1`);
     const r = await db.query<{ brand_primary: string }>(
       `SELECT brand_primary FROM platform_theme_config WHERE id = 1`,
     );
@@ -107,18 +105,12 @@ describe('platform_theme_config — schema correctness (Phase 1, Unit 4)', () =>
   });
 
   it('rejects a negative radius', async () => {
-    const err = await tryExec(
-      db,
-      `UPDATE platform_theme_config SET radius_sm = -1 WHERE id = 1`,
-    );
+    const err = await tryExec(db, `UPDATE platform_theme_config SET radius_sm = -1 WHERE id = 1`);
     expect(err).toMatch(/radius|check/i);
   });
 
   it('rejects version below 1', async () => {
-    const err = await tryExec(
-      db,
-      `UPDATE platform_theme_config SET version = 0 WHERE id = 1`,
-    );
+    const err = await tryExec(db, `UPDATE platform_theme_config SET version = 0 WHERE id = 1`);
     expect(err).toMatch(/version|check/i);
   });
 
@@ -223,9 +215,7 @@ describe('platform_theme_config — schema correctness (Phase 1, Unit 4)', () =>
       `SELECT updated_at FROM platform_theme_config WHERE id = 1`,
     );
     await new Promise((r) => setTimeout(r, 20));
-    await db.query(
-      `UPDATE platform_theme_config SET brand_primary = '#112233' WHERE id = 1`,
-    );
+    await db.query(`UPDATE platform_theme_config SET brand_primary = '#112233' WHERE id = 1`);
     const after = await db.query<{ updated_at: string }>(
       `SELECT updated_at FROM platform_theme_config WHERE id = 1`,
     );
