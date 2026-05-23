@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OccasionPro · Build Command Center (Live)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  :root {
+    --bg-deep: #06060a;
+    --bg-base: #0a0a10;
+    --bg-elev: #11111a;
+    --bg-elev-2: #17171f;
+    --border-faint: rgba(63,63,70,0.35);
+    --border-soft: rgba(82,82,91,0.5);
+    --text-primary: #f4f4f5;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+    --accent-amber: #f59e0b;
+    --accent-coral: #fb7185;
+    --accent-coral-2: #f43f5e;
+    --green: #34d399;
+    --red: #f87171;
+    --blue: #60a5fa;
+    --yellow: #fbbf24;
+  }
+  * { box-sizing: border-box; }
+  html, body, #root { height: 100%; }
+  body {
+    margin: 0;
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at 20% 0%, rgba(245,158,11,0.04) 0%, transparent 50%),
+                radial-gradient(circle at 80% 100%, rgba(251,113,133,0.04) 0%, transparent 50%),
+                var(--bg-deep);
+    color: var(--text-primary);
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .font-display { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.018em; }
+  .font-mono { font-family: 'IBM Plex Mono', monospace; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 6px; border: 2px solid var(--bg-deep); }
+  ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #fbbf24 0%, #fb7185 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .gradient-bg { background: linear-gradient(135deg, #f59e0b 0%, #fb7185 100%); }
+
+  .card {
+    background: linear-gradient(180deg, rgba(23,23,31,0.55) 0%, rgba(13,13,18,0.4) 100%);
+    border: 1px solid var(--border-faint);
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+  }
+  .card-hover { transition: border-color 0.18s, transform 0.18s, background 0.18s; }
+  .card-hover:hover {
+    border-color: rgba(251,113,133,0.35);
+    background: linear-gradient(180deg, rgba(28,28,38,0.7) 0%, rgba(18,18,24,0.5) 100%);
+  }
+
+  .progress-track { background: #16161e; border-radius: 999px; overflow: hidden; height: 6px; position: relative; }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b 0%, #fb7185 100%);
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 0 12px rgba(251,113,133,0.4);
+  }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px; font-weight: 500; font-size: 13px; transition: all 0.15s; cursor: pointer; border: none; outline: none; }
+  .btn-primary {
+    background: linear-gradient(135deg, #f59e0b 0%, #fb7185 100%);
+    color: #0a0a10;
+    font-weight: 600;
+    box-shadow: 0 4px 14px -2px rgba(251,113,133,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 24px -6px rgba(251,113,133,0.5); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-ghost {
+    background: rgba(39,39,46,0.6);
+    color: var(--text-primary);
+    border: 1px solid var(--border-faint);
+  }
+  .btn-ghost:hover { background: rgba(63,63,70,0.7); border-color: var(--border-soft); }
+  .btn-danger {
+    background: rgba(248,113,113,0.1);
+    color: #fca5a5;
+    border: 1px solid rgba(248,113,113,0.3);
+  }
+  .btn-danger:hover { background: rgba(248,113,113,0.2); border-color: rgba(248,113,113,0.5); }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+    border: 1px solid transparent;
+  }
+  .chip-green { background: rgba(52,211,153,0.1); color: #6ee7b7; border-color: rgba(52,211,153,0.25); }
+  .chip-red { background: rgba(248,113,113,0.1); color: #fca5a5; border-color: rgba(248,113,113,0.25); }
+  .chip-amber { background: rgba(251,191,36,0.1); color: #fcd34d; border-color: rgba(251,191,36,0.25); }
+  .chip-blue { background: rgba(96,165,250,0.1); color: #93c5fd; border-color: rgba(96,165,250,0.25); }
+  .chip-gray { background: rgba(113,113,122,0.12); color: #d4d4d8; border-color: rgba(113,113,122,0.2); }
+  .chip-coral { background: rgba(251,113,133,0.12); color: #fda4af; border-color: rgba(251,113,133,0.3); }
+
+  .input, .textarea, .select {
+    width: 100%;
+    background: rgba(11,11,17,0.7);
+    border: 1px solid var(--border-faint);
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s;
+    outline: none;
+  }
+  .input:focus, .textarea:focus, .select:focus {
+    border-color: rgba(251,113,133,0.5);
+    background: rgba(17,17,26,0.9);
+  }
+  .input::placeholder, .textarea::placeholder { color: #52525b; }
+  .textarea { resize: vertical; min-height: 86px; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; line-height: 1.55; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 13.5px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+    position: relative;
+  }
+  .nav-item:hover { background: rgba(39,39,46,0.4); color: var(--text-primary); }
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(251,113,133,0.08) 100%);
+    color: var(--text-primary);
+    border: 1px solid rgba(251,113,133,0.2);
+  }
+  .nav-item.active::before {
+    content: ''; position: absolute; left: -1px; top: 8px; bottom: 8px; width: 3px;
+    background: linear-gradient(180deg, #f59e0b 0%, #fb7185 100%);
+    border-radius: 999px;
+  }
+
+  .pulse-dot { position: relative; }
+  .pulse-dot::after {
+    content: ''; position: absolute; inset: -3px; border-radius: 999px;
+    background: inherit; opacity: 0.4;
+    animation: pulse-ring 1.8s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+
+  .fade-in { animation: fade-in 0.3s ease-out; }
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .slide-in { animation: slide-in 0.28s cubic-bezier(0.16,1,0.3,1); }
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateX(12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .scale-in { animation: scale-in 0.2s cubic-bezier(0.16,1,0.3,1); }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, rgba(63,63,70,0.15) 0%, rgba(82,82,91,0.3) 50%, rgba(63,63,70,0.15) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 8px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border-faint), transparent); }
+
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(3,3,8,0.7);
+    backdrop-filter: blur(8px); z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-panel {
+    background: var(--bg-elev);
+    border: 1px solid var(--border-soft);
+    border-radius: 18px;
+    max-width: 760px; width: 100%; max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(251,113,133,0.05);
+  }
+
+  .drawer-backdrop {
+    position: fixed; inset: 0; background: rgba(3,3,8,0.6);
+    backdrop-filter: blur(6px); z-index: 90;
+  }
+  .drawer-panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 560px; max-width: 95vw;
+    background: var(--bg-elev);
+    border-left: 1px solid var(--border-soft);
+    z-index: 95; overflow-y: auto;
+    box-shadow: -20px 0 60px -20px rgba(0,0,0,0.7);
+    animation: drawer-in 0.28s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes drawer-in { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .kbd {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(39,39,46,0.8);
+    border: 1px solid var(--border-faint);
+    color: var(--text-tertiary);
+  }
+
+  .ring-coral { box-shadow: 0 0 0 1px rgba(251,113,133,0.4), 0 0 0 4px rgba(251,113,133,0.08); }
+
+  .empty-illustration {
+    width: 100%; max-width: 280px;
+    opacity: 0.55;
+    margin: 0 auto 24px;
+  }
+
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+
+  .diff-add { background: rgba(52,211,153,0.08); border-left: 2px solid rgba(52,211,153,0.6); }
+  .diff-remove { background: rgba(248,113,113,0.08); border-left: 2px solid rgba(248,113,113,0.6); }
+  .diff-change { background: rgba(96,165,250,0.06); border-left: 2px solid rgba(96,165,250,0.5); }
+  .diff-same { border-left: 2px solid var(--border-faint); }
+
+  /* Tailwind-aware focus rings on raw buttons */
+  button:focus-visible { outline: 2px solid rgba(251,113,133,0.5); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+/* ========================== CONSTANTS ============================ */
+const STORAGE_KEY = 'occasionpro:builds:v1';
+const META_KEY = 'occasionpro:meta:v1';
+
+const PHASES = [
+  { id: 1, name: 'Foundational', short: 'Foundational', hint: 'Core enums, base tables, extensions' },
+  { id: 2, name: 'Tenancy', short: 'Tenancy', hint: 'Tenants, org graph, RLS scaffolding' },
+  { id: 3, name: 'Events', short: 'Events', hint: 'Event lifecycle, schedule, venues' },
+  { id: 4, name: 'Cross-Tenant Accounts', short: 'X-Tenant', hint: 'Auth, sessions, multi-tenant link' },
+  { id: 5, name: 'Operations & Guests', short: 'Ops & Guests', hint: 'Guests, RSVPs, ops board' },
+  { id: 6, name: 'Finance', short: 'Finance', hint: 'Invoices, payments, money columns' },
+  { id: 7, name: 'Storage', short: 'Storage', hint: 'R2, file metadata, signing' },
+  { id: 8, name: 'Communications', short: 'Comms', hint: 'Resend, templates, threads' },
+  { id: 9, name: 'Integrations', short: 'Integrations', hint: 'WorkOS, DocuSign, Razorpay, Stripe' },
+  { id: 10, name: 'Support & Audit', short: 'Support & Audit', hint: 'Tickets, audit log, redaction' },
+  { id: 11, name: 'Triggers & Functions', short: 'Triggers & Fns', hint: 'PG triggers, edge functions' },
+  { id: 12, name: 'Views / RLS / Seed', short: 'Views & Seed', hint: 'Views, RLS, seed data, smoke' },
+];
+
+const STATUS_OPTIONS = ['Pending', 'In Progress', 'Done', 'Failed', 'Blocked', 'NA'];
+const MIGRATION_OPTIONS = ['Pending', 'Done', 'Failed', 'NA'];
+const UI_OPTIONS = ['Pending', 'In Progress', 'Done', 'NA'];
+
+/* ============================ ICONS ============================== */
+/* Inline SVG icons in Lucide / Phosphor style — never emoji */
+const Icon = ({ d, size = 18, stroke = 1.6, fill = 'none', className = '', children }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+       fill={fill} stroke="currentColor" strokeWidth={stroke}
+       strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {children || (Array.isArray(d) ? d.map((p, i) => <path key={i} d={p} />) : <path d={d} />)}
+  </svg>
+);
+const IcActivity = (p) => <Icon {...p}><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></Icon>;
+const IcHistory = (p) => <Icon {...p}><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></Icon>;
+const IcGitCompare = (p) => <Icon {...p}><circle cx="5" cy="6" r="3" /><circle cx="19" cy="18" r="3" /><path d="M8 6h7a4 4 0 0 1 4 4v5" /><path d="M16 18H9a4 4 0 0 1-4-4V9" /></Icon>;
+const IcListChecks = (p) => <Icon {...p}><path d="M3 6l2 2 4-4" /><path d="M3 14l2 2 4-4" /><path d="M13 7h8" /><path d="M13 15h8" /></Icon>;
+const IcScroll = (p) => <Icon {...p}><path d="M8 21h12a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-7" /><path d="M19 17V5a2 2 0 0 0-2-2H4" /><path d="M15 8h-6" /><path d="M15 12h-6" /><path d="M2 5a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2v-4h6" /></Icon>;
+const IcPlus = (p) => <Icon {...p}><path d="M12 5v14" /><path d="M5 12h14" /></Icon>;
+const IcClipboard = (p) => <Icon {...p}><rect x="8" y="2" width="8" height="4" rx="1" /><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /></Icon>;
+const IcDownload = (p) => <Icon {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></Icon>;
+const IcUpload = (p) => <Icon {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M17 8l-5-5-5 5" /><path d="M12 3v12" /></Icon>;
+const IcTrash = (p) => <Icon {...p}><path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></Icon>;
+const IcX = (p) => <Icon {...p}><path d="M18 6 6 18" /><path d="m6 6 12 12" /></Icon>;
+const IcSearch = (p) => <Icon {...p}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></Icon>;
+const IcFilter = (p) => <Icon {...p}><path d="M3 6h18M6 12h12M10 18h4" /></Icon>;
+const IcCheck = (p) => <Icon {...p}><path d="M20 6 9 17l-5-5" /></Icon>;
+const IcCheckCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></Icon>;
+const IcXCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></Icon>;
+const IcAlert = (p) => <Icon {...p}><path d="M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></Icon>;
+const IcInfo = (p) => <Icon {...p}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></Icon>;
+const IcClock = (p) => <Icon {...p}><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></Icon>;
+const IcZap = (p) => <Icon {...p}><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" /></Icon>;
+const IcDatabase = (p) => <Icon {...p}><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3" /></Icon>;
+const IcShield = (p) => <Icon {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></Icon>;
+const IcLayout = (p) => <Icon {...p}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" /><path d="M9 21V9" /></Icon>;
+const IcGit = (p) => <Icon {...p}><circle cx="12" cy="5" r="2.5" /><circle cx="6" cy="19" r="2.5" /><circle cx="18" cy="19" r="2.5" /><path d="M12 7.5V14a4 4 0 0 1-4 4H6" /><path d="M18 16.5V14a4 4 0 0 0-4-4h-2" /></Icon>;
+const IcMore = (p) => <Icon {...p}><circle cx="12" cy="5" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="12" cy="19" r="1.6" /></Icon>;
+const IcCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10" /></Icon>;
+const IcArrowRight = (p) => <Icon {...p}><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></Icon>;
+const IcCommand = (p) => <Icon {...p}><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z" /></Icon>;
+const IcSpark = (p) => <Icon {...p}><path d="M12 3v3" /><path d="M12 18v3" /><path d="M3 12h3" /><path d="M18 12h3" /><path d="m5.6 5.6 2.1 2.1" /><path d="m16.3 16.3 2.1 2.1" /><path d="m5.6 18.4 2.1-2.1" /><path d="m16.3 7.7 2.1-2.1" /></Icon>;
+const IcRefresh = (p) => <Icon {...p}><path d="M21 12a9 9 0 1 1-3-6.7" /><path d="M21 4v5h-5" /></Icon>;
+const IcCloud = (p) => <Icon {...p}><path d="M17.5 19a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.7 1.5A4 4 0 0 0 6 19h11.5z" /></Icon>;
+const IcEye = (p) => <Icon {...p}><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" /></Icon>;
+const IcLayers = (p) => <Icon {...p}><path d="m12 2 9 5-9 5-9-5 9-5z" /><path d="m3 12 9 5 9-5" /><path d="m3 17 9 5 9-5" /></Icon>;
+const IcSliders = (p) => <Icon {...p}><line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" /><line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" /><line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" /><line x1="1" y1="14" x2="7" y2="14" /><line x1="9" y1="8" x2="15" y2="8" /><line x1="17" y1="16" x2="23" y2="16" /></Icon>;
+const IcFlame = (p) => <Icon {...p}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></Icon>;
+
+/* =========================== STORAGE ============================= */
+/* Wrapped in try/catch — falls back to in-memory if window.storage unavailable */
+const memoryStore = new Map();
+
+async function storageGet(key) {
+  try {
+    if (window.storage && typeof window.storage.get === 'function') {
+      const v = await window.storage.get(key, { shared: true });
+      return v == null ? null : v;
+    }
+    if (window.storage && typeof window.storage.getItem === 'function') {
+      const v = await window.storage.getItem(key, { shared: true });
+      return v == null ? null : v;
+    }
+  } catch (e) {
+    console.warn('[storage.get] falling back to memory:', e.message);
+  }
+  return memoryStore.has(key) ? memoryStore.get(key) : null;
+}
+
+async function storageSet(key, value) {
+  try {
+    if (window.storage && typeof window.storage.set === 'function') {
+      await window.storage.set(key, value, { shared: true });
+      return true;
+    }
+    if (window.storage && typeof window.storage.setItem === 'function') {
+      await window.storage.setItem(key, value, { shared: true });
+      return true;
+    }
+  } catch (e) {
+    console.warn('[storage.set] falling back to memory:', e.message);
+  }
+  memoryStore.set(key, value);
+  return false;
+}
+
+async function loadBuilds() {
+  const raw = await storageGet(STORAGE_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (e) {
+    console.error('[loadBuilds] parse error:', e);
+    return [];
+  }
+}
+
+async function saveBuilds(builds) {
+  const payload = JSON.stringify(builds);
+  return await storageSet(STORAGE_KEY, payload);
+}
+
+async function loadMeta() {
+  const raw = await storageGet(META_KEY);
+  if (!raw) return { lastSynced: null };
+  try {
+    return typeof raw === 'string' ? JSON.parse(raw) : raw;
+  } catch { return { lastSynced: null }; }
+}
+
+async function saveMeta(meta) {
+  return await storageSet(META_KEY, JSON.stringify(meta));
+}
+
+/* ============================ PARSER ============================= */
+/* Parses the exact STATUS BLOCK format from the project instructions */
+function parseStatusBlock(text) {
+  if (!text || typeof text !== 'string') return null;
+  const cleaned = text.replace(/\r\n/g, '\n');
+  // optional ### BUILD STATUS header
+  const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+  const fields = {};
+  const fieldNames = [
+    'phase','unit','version','migration','tests','rls_tests','ui',
+    'committed','what_went_well','what_went_wrong','blocked_by','next_unit'
+  ];
+  for (const ln of lines) {
+    // skip the header line
+    if (/^#+\s*BUILD\s*STATUS/i.test(ln)) continue;
+    const m = ln.match(/^([a-zA-Z_]+)\s*:\s*(.*)$/);
+    if (m) {
+      const k = m[1].toLowerCase();
+      if (fieldNames.includes(k)) {
+        fields[k] = m[2].trim();
+      }
+    }
+  }
+  if (Object.keys(fields).length === 0) return null;
+
+  // Migration: "Done — file.sql" or "Done"
+  let migrationStatus = '', migrationFile = '';
+  if (fields.migration) {
+    const parts = fields.migration.split(/[—\-–]\s*/);
+    migrationStatus = (parts[0] || '').trim();
+    migrationFile = (parts.slice(1).join(' — ') || '').trim();
+  }
+
+  // tests "5/6"
+  const parseRatio = (s) => {
+    if (!s) return { passed: 0, total: 0 };
+    const m = s.match(/(\d+)\s*\/\s*(\d+)/);
+    if (m) return { passed: parseInt(m[1], 10), total: parseInt(m[2], 10) };
+    return { passed: 0, total: 0 };
+  };
+  const tests = parseRatio(fields.tests);
+  const rls = parseRatio(fields.rls_tests);
+
+  // version "v3" → 3
+  let version = null;
+  if (fields.version) {
+    const vm = fields.version.match(/v?(\d+)/i);
+    if (vm) version = parseInt(vm[1], 10);
+  }
+  let phase = null;
+  if (fields.phase) {
+    const pm = fields.phase.match(/(\d+)/);
+    if (pm) phase = parseInt(pm[1], 10);
+  }
+
+  // committed: git sha or "pending"
+  let committed = false, gitSha = '';
+  if (fields.committed) {
+    const cv = fields.committed.toLowerCase();
+    if (cv && cv !== 'pending' && cv !== 'no' && cv !== 'false' && cv !== 'na' && cv !== '-') {
+      committed = true;
+      gitSha = fields.committed;
+    }
+  }
+
+  return {
+    phase: phase ?? '',
+    unit: fields.unit || '',
+    version,
+    migration: { status: migrationStatus || 'Pending', file: migrationFile },
+    tests,
+    rlsTests: rls,
+    ui: fields.ui || 'Pending',
+    committed,
+    gitSha,
+    whatWentWell: fields.what_went_well || '',
+    whatWentWrong: fields.what_went_wrong || '',
+    blockedBy: fields.blocked_by || '',
+    nextUnit: fields.next_unit || '',
+    checklist: [],
+  };
+}
+
+/* ============================ HELPERS ============================ */
+const ratio = (p, t) => (t === 0 ? 0 : Math.round((p / t) * 100));
+
+function formatRelative(iso) {
+  if (!iso) return '—';
+  const then = new Date(iso).getTime();
+  const now = Date.now();
+  const s = Math.floor((now - then) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+  if (s < 86400 * 7) return `${Math.floor(s/86400)}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function statusChipClass(s) {
+  if (!s) return 'chip-gray';
+  const v = String(s).toLowerCase();
+  if (v.includes('done') || v.includes('pass')) return 'chip-green';
+  if (v.includes('fail') || v.includes('block')) return 'chip-red';
+  if (v.includes('progress')) return 'chip-amber';
+  if (v.includes('na') || v === '—') return 'chip-gray';
+  if (v.includes('pend')) return 'chip-blue';
+  return 'chip-gray';
+}
+
+function downloadJSON(filename, data) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 200);
+}
+
+function nextVersion(builds) {
+  if (!builds || builds.length === 0) return 1;
+  return Math.max(...builds.map(b => b.version || 0)) + 1;
+}
+
+function makeBuildId() {
+  return 'b_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+
+/* ================== FILE SYSTEM ACCESS (auto-sync) ================
+   Binds to build-log.jsonl in the project folder. Polled every 4s.
+   Each line is one build JSON object. Entries dedupe by id (or
+   version+unit fallback). One-time permission grant; handle persisted
+   via IndexedDB so it survives page reloads.                          */
+const IDB_NAME = 'occasionpro-fsa';
+const IDB_STORE = 'handles';
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbGet(key) {
+  try {
+    const db = await idbOpen();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const req = tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (_) { return null; }
+}
+async function idbSet(key, value) {
+  try {
+    const db = await idbOpen();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readwrite');
+      tx.objectStore(IDB_STORE).put(value, key);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    return true;
+  } catch (_) { return false; }
+}
+const FSA_SUPPORTED = typeof window !== 'undefined' && 'showOpenFilePicker' in window;
+async function pickLogFile() {
+  if (!FSA_SUPPORTED) throw new Error('File System Access API not supported. Use Chrome, Edge, Brave, or Arc.');
+  const [handle] = await window.showOpenFilePicker({
+    types: [{ description: 'Build log (JSONL)', accept: { 'application/jsonl': ['.jsonl'], 'application/json': ['.json'], 'text/plain': ['.txt'] } }],
+    multiple: false,
+  });
+  return handle;
+}
+async function ensureReadPermission(handle) {
+  if (!handle || !handle.queryPermission) return false;
+  const opts = { mode: 'read' };
+  if ((await handle.queryPermission(opts)) === 'granted') return true;
+  return (await handle.requestPermission(opts)) === 'granted';
+}
+async function readBuildsFromFile(handle) {
+  const file = await handle.getFile();
+  const text = await file.text();
+  const lastModified = file.lastModified;
+  if (!text.trim()) return { builds: [], lastModified };
+  const builds = [];
+  // JSONL first
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  for (const ln of lines) {
+    try {
+      const obj = JSON.parse(ln);
+      if (obj && typeof obj === 'object' && !Array.isArray(obj)) builds.push(obj);
+    } catch (_) { /* skip malformed */ }
+  }
+  // fall back to whole-file array if JSONL parse yielded nothing
+  if (builds.length === 0) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) builds.push(...parsed);
+      else if (parsed && Array.isArray(parsed.builds)) builds.push(...parsed.builds);
+    } catch (_) {}
+  }
+  return { builds, lastModified };
+}
+function mergeBuildEntries(existing, incoming) {
+  const map = new Map();
+  const keyOf = (b) => b.id || `${b.version}|${(b.unit||'').toLowerCase()}|${b.timestamp||''}`;
+  for (const b of existing) map.set(keyOf(b), b);
+  for (const b of incoming) {
+    const k = keyOf(b);
+    const normalized = {
+      ...b,
+      id: b.id || makeBuildId(),
+      tests: b.tests || { passed: 0, total: 0 },
+      rlsTests: b.rlsTests || { passed: 0, total: 0 },
+      migration: b.migration || { status: 'Pending', file: '' },
+      checklist: b.checklist || [],
+      timestamp: b.timestamp || new Date().toISOString(),
+    };
+    map.set(k, { ...map.get(k), ...normalized });
+  }
+  return Array.from(map.values()).sort((a, b) => (b.version || 0) - (a.version || 0));
+}
+
+/* Determine an overall pass/fail/in-progress for a build */
+function overallStatus(b) {
+  const m = (b.migration?.status || '').toLowerCase();
+  if (m === 'failed') return 'failed';
+  if ((b.blockedBy || '').trim() && b.blockedBy.trim().toLowerCase() !== 'none') return 'blocked';
+  const testsOk = b.tests.total === 0 ? true : b.tests.passed === b.tests.total;
+  const rlsOk = b.rlsTests.total === 0 ? true : b.rlsTests.passed === b.rlsTests.total;
+  if (!testsOk || !rlsOk) return 'failed';
+  if (m === 'done' && (b.ui || '').toLowerCase() === 'done' && b.committed) return 'passed';
+  return 'in_progress';
+}
+
+/* ============================ APP ROOT =========================== */
+function App() {
+  const [builds, setBuilds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState('overview');
+  const [showAdd, setShowAdd] = useState(false);
+  const [showPaste, setShowPaste] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [showClear, setShowClear] = useState(false);
+  const [selectedBuild, setSelectedBuild] = useState(null);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('idle'); // idle | syncing | synced | error
+  const [lastSynced, setLastSynced] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [fileHandle, setFileHandle] = useState(null);
+  const [fileConnected, setFileConnected] = useState(false);
+  const [fileName, setFileName] = useState('');
+  const [fileLastSeen, setFileLastSeen] = useState(0);
+  const lastModRef = useRef(0);
+
+  /* initial load */
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await loadBuilds();
+        const meta = await loadMeta();
+        if (!cancelled) {
+          setBuilds(data);
+          setLastSynced(meta.lastSynced);
+          setSyncStatus('synced');
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setSyncStatus('error');
+          showToast('Could not load builds — using local memory', 'error');
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  /* polling refresh — picks up writes from other chats */
+  useEffect(() => {
+    let cancelled = false;
+    const interval = setInterval(async () => {
+      if (cancelled) return;
+      try {
+        const data = await loadBuilds();
+        if (cancelled) return;
+        setBuilds(prev => {
+          if (data.length !== prev.length) return data;
+          // shallow check for last entry id
+          if (data.length && prev.length && data[0].id !== prev[0].id) return data;
+          return prev;
+        });
+      } catch (_) {}
+    }, 8000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, []);
+
+  /* file binding — restore persisted handle on load */
+  useEffect(() => {
+    (async () => {
+      const handle = await idbGet('logFile');
+      if (!handle) return;
+      try {
+        const granted = await ensureReadPermission(handle);
+        if (granted) {
+          setFileHandle(handle);
+          setFileName(handle.name || 'build-log.jsonl');
+          setFileConnected(true);
+        } else {
+          // need a user gesture to re-grant; mark as pending
+          setFileHandle(handle);
+          setFileName(handle.name || 'build-log.jsonl');
+          setFileConnected(false);
+        }
+      } catch (_) {}
+    })();
+  }, []);
+
+  /* file polling — every 4s, read file, merge new entries */
+  useEffect(() => {
+    if (!fileHandle || !fileConnected) return;
+    let cancelled = false;
+    const tick = async () => {
+      if (cancelled) return;
+      try {
+        const file = await fileHandle.getFile();
+        if (file.lastModified === lastModRef.current) return;
+        lastModRef.current = file.lastModified;
+        const { builds: incoming, lastModified } = await readBuildsFromFile(fileHandle);
+        if (cancelled) return;
+        setFileLastSeen(lastModified);
+        setBuilds(prev => {
+          const merged = mergeBuildEntries(prev, incoming);
+          // persist back to shared storage so other chats see it
+          if (merged.length !== prev.length || merged.some((m, i) => m.id !== prev[i]?.id)) {
+            persist(merged);
+            return merged;
+          }
+          return prev;
+        });
+      } catch (e) {
+        if (e && e.name === 'NotAllowedError') {
+          setFileConnected(false);
+        }
+      }
+    };
+    tick();
+    const id = setInterval(tick, 4000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [fileHandle, fileConnected, persist]);
+
+  const showToast = useCallback((msg, kind = 'info') => {
+    setToast({ msg, kind, t: Date.now() });
+    setTimeout(() => setToast(t => (t && t.msg === msg ? null : t)), 3200);
+  }, []);
+
+  const persist = useCallback(async (next) => {
+    setSyncStatus('syncing');
+    try {
+      await saveBuilds(next);
+      const now = new Date().toISOString();
+      await saveMeta({ lastSynced: now });
+      setLastSynced(now);
+      setSyncStatus('synced');
+    } catch (e) {
+      setSyncStatus('error');
+      showToast('Sync failed — kept locally', 'error');
+    }
+  }, [showToast]);
+
+  const addBuild = useCallback(async (partial) => {
+    const id = makeBuildId();
+    const v = partial.version && partial.version > 0 ? partial.version : nextVersion(builds);
+    const entry = {
+      id,
+      version: v,
+      timestamp: partial.timestamp || new Date().toISOString(),
+      phase: partial.phase || '',
+      unit: partial.unit || '',
+      migration: partial.migration || { status: 'Pending', file: '' },
+      tests: partial.tests || { passed: 0, total: 0 },
+      rlsTests: partial.rlsTests || { passed: 0, total: 0 },
+      ui: partial.ui || 'Pending',
+      committed: !!partial.committed,
+      gitSha: partial.gitSha || '',
+      whatWentWell: partial.whatWentWell || '',
+      whatWentWrong: partial.whatWentWrong || '',
+      blockedBy: partial.blockedBy || '',
+      nextUnit: partial.nextUnit || '',
+      checklist: partial.checklist || [],
+    };
+    const next = [entry, ...builds].sort((a, b) => b.version - a.version);
+    setBuilds(next);
+    await persist(next);
+    showToast(`Build v${entry.version} logged`, 'success');
+    return entry;
+  }, [builds, persist, showToast]);
+
+  const updateBuild = useCallback(async (id, updater) => {
+    const next = builds.map(b => b.id === id ? { ...b, ...updater(b) } : b);
+    setBuilds(next);
+    await persist(next);
+  }, [builds, persist]);
+
+  const removeBuild = useCallback(async (id) => {
+    const next = builds.filter(b => b.id !== id);
+    setBuilds(next);
+    await persist(next);
+    showToast('Build removed', 'info');
+  }, [builds, persist, showToast]);
+
+  const clearAll = useCallback(async () => {
+    setBuilds([]);
+    await persist([]);
+    setShowClear(false);
+    showToast('All builds cleared', 'info');
+  }, [persist, showToast]);
+
+  const connectLogFile = useCallback(async () => {
+    try {
+      const handle = await pickLogFile();
+      const granted = await ensureReadPermission(handle);
+      if (!granted) throw new Error('Permission denied');
+      await idbSet('logFile', handle);
+      lastModRef.current = 0;
+      setFileHandle(handle);
+      setFileName(handle.name || 'build-log.jsonl');
+      setFileConnected(true);
+      showToast(`Live · ${handle.name}`, 'success');
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+      showToast('Connect failed: ' + (e.message || e), 'error');
+    }
+  }, [showToast]);
+
+  const disconnectLogFile = useCallback(async () => {
+    await idbSet('logFile', null);
+    setFileHandle(null);
+    setFileConnected(false);
+    setFileName('');
+    lastModRef.current = 0;
+    showToast('Disconnected log file', 'info');
+  }, [showToast]);
+
+  const handleExport = useCallback(() => {
+    const payload = {
+      schema: 'occasionpro.build-log',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      builds,
+    };
+    downloadJSON(`occasionpro-build-log-${new Date().toISOString().slice(0,10)}.json`, payload);
+    showToast(`Exported ${builds.length} build${builds.length === 1 ? '' : 's'}`, 'success');
+    setMoreOpen(false);
+  }, [builds, showToast]);
+
+  const handleImport = useCallback(async (file, mode) => {
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const incoming = Array.isArray(parsed) ? parsed : (parsed.builds || []);
+      if (!Array.isArray(incoming)) throw new Error('Bad format');
+      let next;
+      if (mode === 'replace') {
+        next = incoming;
+      } else {
+        // merge by id (or version+unit if no id)
+        const map = new Map(builds.map(b => [b.id || `${b.version}|${b.unit}`, b]));
+        for (const b of incoming) {
+          const key = b.id || `${b.version}|${b.unit}`;
+          map.set(key, { ...map.get(key), ...b, id: b.id || makeBuildId() });
+        }
+        next = Array.from(map.values());
+      }
+      next = next
+        .filter(b => b && typeof b === 'object')
+        .map(b => ({
+          ...b,
+          id: b.id || makeBuildId(),
+          tests: b.tests || { passed: 0, total: 0 },
+          rlsTests: b.rlsTests || { passed: 0, total: 0 },
+          migration: b.migration || { status: 'Pending', file: '' },
+          checklist: b.checklist || [],
+          timestamp: b.timestamp || new Date().toISOString(),
+        }))
+        .sort((a, b) => (b.version || 0) - (a.version || 0));
+      setBuilds(next);
+      await persist(next);
+      showToast(`Imported ${incoming.length} build${incoming.length === 1 ? '' : 's'}`, 'success');
+      setShowImport(false);
+    } catch (e) {
+      showToast('Import failed: ' + e.message, 'error');
+    }
+  }, [builds, persist, showToast]);
+
+  /* aggregated stats */
+  const stats = useMemo(() => computeStats(builds), [builds]);
+
+  if (loading) return <Loading />;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header
+        builds={builds}
+        stats={stats}
+        onAdd={() => setShowAdd(true)}
+        onPaste={() => setShowPaste(true)}
+        moreOpen={moreOpen}
+        setMoreOpen={setMoreOpen}
+        onExport={handleExport}
+        onImport={() => { setShowImport(true); setMoreOpen(false); }}
+        onClear={() => { setShowClear(true); setMoreOpen(false); }}
+        syncStatus={syncStatus}
+        lastSynced={lastSynced}
+        fileConnected={fileConnected}
+        fileName={fileName}
+        fileLastSeen={fileLastSeen}
+        onConnectFile={connectLogFile}
+        onDisconnectFile={disconnectLogFile}
+      />
+
+      <div className="flex-1 flex" style={{ minHeight: 0 }}>
+        <Sidebar view={view} setView={setView} stats={stats} />
+        <main className="flex-1 overflow-y-auto" style={{ paddingBottom: 64 }}>
+          <div className="max-w-[1480px] mx-auto px-8 py-8 fade-in" key={view}>
+            {builds.length === 0 ? (
+              <EmptyState onAdd={() => setShowAdd(true)} onPaste={() => setShowPaste(true)} />
+            ) : view === 'overview' ? (
+              <OverviewView builds={builds} stats={stats} onSelect={setSelectedBuild} />
+            ) : view === 'history' ? (
+              <HistoryView builds={builds} onSelect={setSelectedBuild} onDelete={removeBuild} />
+            ) : view === 'compare' ? (
+              <CompareView builds={builds} />
+            ) : view === 'checklist' ? (
+              <ChecklistView builds={builds} onSelect={setSelectedBuild} updateBuild={updateBuild} />
+            ) : view === 'log' ? (
+              <LogView builds={builds} onSelect={setSelectedBuild} />
+            ) : null}
+          </div>
+        </main>
+      </div>
+
+      {showAdd && (
+        <AddBuildModal
+          defaultVersion={nextVersion(builds)}
+          onClose={() => setShowAdd(false)}
+          onSubmit={async (data) => { await addBuild(data); setShowAdd(false); }}
+        />
+      )}
+      {showPaste && (
+        <PasteLogModal
+          defaultVersion={nextVersion(builds)}
+          onClose={() => setShowPaste(false)}
+          onSubmit={async (data) => { await addBuild(data); setShowPaste(false); }}
+        />
+      )}
+      {showImport && (
+        <ImportModal onClose={() => setShowImport(false)} onImport={handleImport} buildsCount={builds.length} />
+      )}
+      {showClear && (
+        <ConfirmModal
+          title="Clear all builds?"
+          description={`This permanently removes all ${builds.length} build records from the shared store across every chat in this project. Export a backup first if you want one.`}
+          confirmLabel="Yes, delete everything"
+          danger
+          onConfirm={clearAll}
+          onCancel={() => setShowClear(false)}
+        />
+      )}
+      {selectedBuild && (
+        <DetailDrawer
+          build={selectedBuild}
+          onClose={() => setSelectedBuild(null)}
+          onUpdate={async (next) => {
+            await updateBuild(selectedBuild.id, () => next);
+            setSelectedBuild({ ...selectedBuild, ...next });
+          }}
+          onDelete={async () => {
+            await removeBuild(selectedBuild.id);
+            setSelectedBuild(null);
+          }}
+        />
+      )}
+
+      {toast && <Toast {...toast} />}
+    </div>
+  );
+}
+
+/* ============================ HEADER ============================= */
+function Header({ builds, stats, onAdd, onPaste, moreOpen, setMoreOpen, onExport, onImport, onClear, syncStatus, lastSynced, fileConnected, fileName, fileLastSeen, onConnectFile, onDisconnectFile }) {
+  const moreRef = useRef(null);
+  useEffect(() => {
+    const onClick = (e) => { if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false); };
+    if (moreOpen) document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [moreOpen, setMoreOpen]);
+
+  const syncDot = {
+    idle: 'bg-zinc-500',
+    syncing: 'bg-amber-400 pulse-dot',
+    synced: 'bg-emerald-400',
+    error: 'bg-rose-500',
+  }[syncStatus];
+  const syncLabel = {
+    idle: 'Idle',
+    syncing: 'Syncing…',
+    synced: 'Synced across all project chats',
+    error: 'Sync error — local only',
+  }[syncStatus];
+
+  return (
+    <header className="border-b" style={{ borderColor: 'var(--border-faint)', background: 'rgba(7,7,12,0.85)', backdropFilter: 'blur(14px)', position: 'sticky', top: 0, zIndex: 30 }}>
+      <div className="max-w-[1480px] mx-auto px-8 h-[68px] flex items-center justify-between gap-6">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative w-10 h-10 rounded-xl gradient-bg flex items-center justify-center shadow-lg" style={{ boxShadow: '0 8px 28px -6px rgba(251,113,133,0.4)' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a10" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2 4 7v10l8 5 8-5V7z" />
+                <path d="M12 22V12" />
+                <path d="m4 7 8 5 8-5" />
+              </svg>
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-2">
+                <h1 className="font-display text-[17px] font-semibold tracking-tight">OccasionPro</h1>
+                <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">Command Center</span>
+              </div>
+              <div className="text-[11.5px] text-zinc-500 mt-0.5 flex items-center gap-2 flex-wrap">
+                <span className={`inline-block w-1.5 h-1.5 rounded-full ${syncDot}`}></span>
+                <span>{syncLabel}{lastSynced ? ` · ${formatRelative(lastSynced)}` : ''}</span>
+                {fileConnected && (
+                  <>
+                    <span className="text-zinc-700">·</span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
+                      <span className="text-emerald-300/90">Auto-write live</span>
+                      <span className="font-mono text-zinc-500">{fileName}</span>
+                      {fileLastSeen ? <span className="text-zinc-600">· {formatRelative(new Date(fileLastSeen).toISOString())}</span> : null}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden md:flex items-center gap-5 flex-1 justify-center max-w-2xl">
+          <Stat label="Version" value={stats.currentVersion ? `v${stats.currentVersion}` : '—'} accent />
+          <DividerV />
+          <Stat label="Builds" value={builds.length} />
+          <DividerV />
+          <Stat label="Tests" value={`${stats.totalTestsPassed}/${stats.totalTests}`} />
+          <DividerV />
+          <Stat label="RLS" value={`${stats.totalRlsPassed}/${stats.totalRls}`} />
+          <DividerV />
+          <Stat label="Done" value={stats.unitsDone} />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <FileConnectButton
+            connected={fileConnected}
+            fileName={fileName}
+            onConnect={onConnectFile}
+            onDisconnect={onDisconnectFile}
+          />
+          <button className="btn btn-ghost hidden md:inline-flex" onClick={onPaste} title="Paste status block (Ctrl+V workflow)">
+            <IcClipboard size={15} />
+            <span>Paste log</span>
+          </button>
+          <button className="btn btn-primary" onClick={onAdd}>
+            <IcPlus size={15} />
+            <span>Add build</span>
+          </button>
+          <div className="relative" ref={moreRef}>
+            <button className="btn btn-ghost px-2.5" onClick={() => setMoreOpen(o => !o)} aria-label="More">
+              <IcMore size={16} />
+            </button>
+            {moreOpen && (
+              <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border scale-in"
+                   style={{ background: 'var(--bg-elev)', borderColor: 'var(--border-soft)', boxShadow: '0 12px 32px -8px rgba(0,0,0,0.6)' }}>
+                <MenuItem icon={<IcDownload size={15} />} onClick={onExport} label="Export JSON" sub={`${builds.length} record${builds.length === 1 ? '' : 's'}`} />
+                <MenuItem icon={<IcUpload size={15} />} onClick={onImport} label="Import JSON" sub="Merge or replace" />
+                <div className="divider mx-2"></div>
+                <MenuItem icon={<IcTrash size={15} />} onClick={onClear} label="Clear all data" danger />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function FileConnectButton({ connected, fileName, onConnect, onDisconnect }) {
+  if (!FSA_SUPPORTED) {
+    return (
+      <button className="btn btn-ghost hidden md:inline-flex opacity-60 cursor-not-allowed"
+              title="File System Access API isn't available in this browser. Use Chrome, Edge, Brave, or Arc to enable auto-write." disabled>
+        <IcAlert size={14} />
+        <span>Auto-write n/a</span>
+      </button>
+    );
+  }
+  if (!connected) {
+    return (
+      <button onClick={onConnect}
+              className="btn btn-ghost hidden md:inline-flex"
+              style={{ borderColor: 'rgba(251,113,133,0.35)', background: 'rgba(251,113,133,0.06)' }}
+              title="Bind dashboard to build-log.jsonl so new builds appear automatically">
+        <IcZap size={14} className="text-amber-300" />
+        <span>Connect log file</span>
+      </button>
+    );
+  }
+  return (
+    <button onClick={onDisconnect}
+            className="btn btn-ghost hidden md:inline-flex"
+            style={{ borderColor: 'rgba(52,211,153,0.35)', background: 'rgba(52,211,153,0.06)' }}
+            title={`Connected to ${fileName} · click to disconnect`}>
+      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
+      <span className="text-emerald-200">Live</span>
+      <span className="font-mono text-[11.5px] text-zinc-400 truncate max-w-[140px]">{fileName}</span>
+    </button>
+  );
+}
+
+function Stat({ label, value, accent }) {
+  return (
+    <div className="flex flex-col items-start leading-tight">
+      <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">{label}</span>
+      <span className={`font-display text-[17px] font-semibold ${accent ? 'gradient-text' : 'text-zinc-100'}`}>{value}</span>
+    </div>
+  );
+}
+function DividerV() { return <div className="w-px h-7" style={{ background: 'var(--border-faint)' }}></div>; }
+function MenuItem({ icon, label, sub, onClick, danger }) {
+  return (
+    <button onClick={onClick} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-zinc-800/40 transition rounded-lg text-left">
+      <span className={danger ? 'text-rose-400' : 'text-zinc-400'}>{icon}</span>
+      <span className="flex-1">
+        <div className={`text-[13px] font-medium ${danger ? 'text-rose-300' : 'text-zinc-100'}`}>{label}</div>
+        {sub && <div className="text-[11px] text-zinc-500">{sub}</div>}
+      </span>
+    </button>
+  );
+}
+
+/* ============================ SIDEBAR ============================ */
+function Sidebar({ view, setView, stats }) {
+  const items = [
+    { id: 'overview', label: 'Overview', icon: IcActivity, hint: 'All 12 phases live' },
+    { id: 'history', label: 'Version History', icon: IcHistory, hint: 'Every build, searchable' },
+    { id: 'compare', label: 'Compare', icon: IcGitCompare, hint: 'Diff two versions' },
+    { id: 'checklist', label: 'Checklist', icon: IcListChecks, hint: 'Pass/fail roll-up' },
+    { id: 'log', label: 'Activity Log', icon: IcScroll, hint: 'Wins, issues, blockers' },
+  ];
+  return (
+    <aside className="w-[252px] flex-shrink-0 border-r p-4 hidden lg:flex flex-col gap-2"
+           style={{ borderColor: 'var(--border-faint)', background: 'rgba(10,10,16,0.5)', position: 'sticky', top: 68, height: 'calc(100vh - 68px)', overflowY: 'auto' }}>
+      <div className="px-2 pb-3 pt-1">
+        <div className="text-[10.5px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Workspaces</div>
+      </div>
+      {items.map(it => {
+        const I = it.icon;
+        return (
+          <button key={it.id} onClick={() => setView(it.id)} className={`nav-item ${view === it.id ? 'active' : ''}`}>
+            <I size={17} />
+            <div className="flex flex-col items-start leading-tight flex-1 min-w-0">
+              <span className="truncate">{it.label}</span>
+              <span className="text-[10.5px] text-zinc-500 truncate">{it.hint}</span>
+            </div>
+          </button>
+        );
+      })}
+
+      <div className="mt-auto p-3 rounded-xl card" style={{ background: 'linear-gradient(180deg, rgba(245,158,11,0.04) 0%, rgba(251,113,133,0.04) 100%)' }}>
+        <div className="flex items-center gap-2 mb-2">
+          <IcSpark size={14} className="text-amber-300" />
+          <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-400">Build Pulse</span>
+        </div>
+        <div className="text-[12.5px] text-zinc-300 leading-relaxed">
+          <div className="flex justify-between"><span className="text-zinc-500">Phases active</span><span className="font-mono text-zinc-200">{stats.phasesActive}/12</span></div>
+          <div className="flex justify-between mt-1"><span className="text-zinc-500">Blocked</span><span className={`font-mono ${stats.blocked > 0 ? 'text-rose-300' : 'text-zinc-200'}`}>{stats.blocked}</span></div>
+          <div className="flex justify-between mt-1"><span className="text-zinc-500">In progress</span><span className="font-mono text-zinc-200">{stats.inProgress}</span></div>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/* =========================== LOADING ============================= */
+function Loading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center gap-6 fade-in">
+        <div className="relative">
+          <div className="w-16 h-16 rounded-2xl gradient-bg flex items-center justify-center" style={{ boxShadow: '0 0 40px rgba(251,113,133,0.4)' }}>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0a0a10" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2 4 7v10l8 5 8-5V7z" />
+              <path d="M12 22V12" />
+              <path d="m4 7 8 5 8-5" />
+            </svg>
+          </div>
+          <div className="absolute inset-0 rounded-2xl gradient-bg opacity-30 blur-2xl"></div>
+        </div>
+        <div className="text-center">
+          <div className="font-display text-lg font-semibold text-zinc-100 mb-1">Loading command center…</div>
+          <div className="text-[12.5px] text-zinc-500 flex items-center gap-2 justify-center">
+            <IcCloud size={13} />
+            <span>Syncing build log from shared project storage</span>
+          </div>
+        </div>
+        <div className="flex gap-1.5">
+          {[0,1,2].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-zinc-600 pulse-dot" style={{ animationDelay: `${i * 0.2}s` }}></div>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================== EMPTY =============================== */
+function EmptyState({ onAdd, onPaste }) {
+  return (
+    <div className="card p-12 text-center fade-in">
+      <svg className="empty-illustration" viewBox="0 0 280 180" xmlns="http://www.w3.org/2000/svg" fill="none">
+        <defs>
+          <linearGradient id="eg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#f59e0b" />
+            <stop offset="100%" stopColor="#fb7185" />
+          </linearGradient>
+        </defs>
+        <rect x="40" y="40" width="200" height="110" rx="10" stroke="url(#eg)" strokeWidth="1.5" strokeDasharray="4 4" opacity="0.5" />
+        <rect x="56" y="60" width="78" height="8" rx="2" fill="#27272a" />
+        <rect x="56" y="76" width="120" height="6" rx="2" fill="#1f1f25" />
+        <rect x="56" y="90" width="168" height="48" rx="6" fill="#13131a" />
+        <circle cx="220" cy="46" r="6" fill="url(#eg)" />
+        <path d="M68 114 l16 -12 l16 8 l16 -14 l16 4 l16 -10 l16 6" stroke="url(#eg)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <h2 className="font-display text-2xl font-semibold mb-2">Ready when you are.</h2>
+      <p className="text-zinc-400 text-[14px] max-w-md mx-auto leading-relaxed mb-8">
+        Log your first OccasionPro build — paste the STATUS BLOCK Claude printed, or fill out the form. Every entry syncs across all chats in this project.
+      </p>
+      <div className="flex items-center justify-center gap-3">
+        <button onClick={onPaste} className="btn btn-ghost">
+          <IcClipboard size={15} /> Paste status block
+        </button>
+        <button onClick={onAdd} className="btn btn-primary">
+          <IcPlus size={15} /> Log first build
+        </button>
+      </div>
+      <div className="mt-10 grid grid-cols-3 gap-4 max-w-2xl mx-auto text-left">
+        {[
+          { i: <IcLayers size={16} />, t: '12-phase pipeline', d: 'Foundational → Views/RLS/Seed' },
+          { i: <IcShield size={16} />, t: 'RLS-aware', d: 'Tests + RLS test pairs tracked separately' },
+          { i: <IcGit size={16} />, t: 'Commit-linked', d: 'Git SHAs, deltas, version diffing' },
+        ].map((f, i) => (
+          <div key={i} className="card p-4">
+            <div className="text-amber-300 mb-2">{f.i}</div>
+            <div className="font-semibold text-[13.5px] text-zinc-100">{f.t}</div>
+            <div className="text-[12px] text-zinc-500 mt-1">{f.d}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* =========================== STATS =============================== */
+function computeStats(builds) {
+  const phaseMap = new Map(PHASES.map(p => [p.id, { ...p, units: new Map(), latestBuild: null }]));
+  let totalTests = 0, totalTestsPassed = 0, totalRls = 0, totalRlsPassed = 0;
+  let blocked = 0, inProgress = 0, unitsDone = 0;
+  let currentVersion = 0;
+  let lastActivity = null;
+
+  for (const b of builds) {
+    if (b.version > currentVersion) currentVersion = b.version;
+    if (!lastActivity || (b.timestamp && b.timestamp > lastActivity)) lastActivity = b.timestamp;
+    totalTests += b.tests?.total || 0;
+    totalTestsPassed += b.tests?.passed || 0;
+    totalRls += b.rlsTests?.total || 0;
+    totalRlsPassed += b.rlsTests?.passed || 0;
+    const ph = phaseMap.get(Number(b.phase));
+    if (!ph) continue;
+    const unitKey = (b.unit || '(unnamed)').toLowerCase();
+    const existing = ph.units.get(unitKey);
+    if (!existing || existing.version < b.version) {
+      ph.units.set(unitKey, b);
+    }
+    if (!ph.latestBuild || (b.timestamp && b.timestamp > (ph.latestBuild.timestamp || ''))) {
+      ph.latestBuild = b;
+    }
+  }
+
+  // tally per-phase unit status
+  const phases = [];
+  for (const ph of phaseMap.values()) {
+    let done = 0, ip = 0, blk = 0, failed = 0, total = 0;
+    let pTests = 0, pTestsPass = 0, pRls = 0, pRlsPass = 0;
+    for (const b of ph.units.values()) {
+      total++;
+      const s = overallStatus(b);
+      if (s === 'passed') done++;
+      else if (s === 'failed') failed++;
+      else if (s === 'blocked') blk++;
+      else ip++;
+      pTests += b.tests?.total || 0; pTestsPass += b.tests?.passed || 0;
+      pRls += b.rlsTests?.total || 0; pRlsPass += b.rlsTests?.passed || 0;
+    }
+    phases.push({
+      id: ph.id, name: ph.name, short: ph.short, hint: ph.hint,
+      units: total, done, inProgress: ip, blocked: blk, failed,
+      tests: { passed: pTestsPass, total: pTests },
+      rlsTests: { passed: pRlsPass, total: pRls },
+      latestBuild: ph.latestBuild,
+    });
+    unitsDone += done; inProgress += ip; blocked += blk;
+  }
+
+  const phasesActive = phases.filter(p => p.units > 0).length;
+  return {
+    phases, totalTests, totalTestsPassed, totalRls, totalRlsPassed,
+    currentVersion, blocked, inProgress, unitsDone, phasesActive,
+    lastActivity,
+  };
+}
+
+/* ========================== OVERVIEW ============================= */
+function OverviewView({ builds, stats, onSelect }) {
+  const overallTestsPct = ratio(stats.totalTestsPassed, stats.totalTests);
+  const overallRlsPct = ratio(stats.totalRlsPassed, stats.totalRls);
+  const overallProgressPct = ratio(stats.unitsDone, stats.unitsDone + stats.inProgress + stats.blocked);
+
+  return (
+    <div className="space-y-8">
+      <SectionHeader
+        eyebrow="Live status"
+        title="Mission Overview"
+        subtitle={`Last activity ${formatRelative(stats.lastActivity)} · v${stats.currentVersion} current · ${builds.length} build records`}
+      />
+
+      {/* Mega cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <MegaStat
+          label="Current build"
+          value={`v${stats.currentVersion || 0}`}
+          icon={<IcZap size={18} />}
+          accent
+          sub={stats.lastActivity ? formatRelative(stats.lastActivity) : 'No activity yet'}
+        />
+        <MegaStat
+          label="Tests passing"
+          value={`${stats.totalTestsPassed}/${stats.totalTests}`}
+          icon={<IcCheckCircle size={18} />}
+          sub={`${overallTestsPct}% of recorded`}
+          progress={overallTestsPct}
+        />
+        <MegaStat
+          label="RLS tests passing"
+          value={`${stats.totalRlsPassed}/${stats.totalRls}`}
+          icon={<IcShield size={18} />}
+          sub={`${overallRlsPct}% of recorded`}
+          progress={overallRlsPct}
+        />
+        <MegaStat
+          label="Pipeline progress"
+          value={`${overallProgressPct}%`}
+          icon={<IcLayers size={18} />}
+          sub={`${stats.unitsDone} done · ${stats.inProgress} active · ${stats.blocked} blocked`}
+          progress={overallProgressPct}
+        />
+      </div>
+
+      {/* Phases */}
+      <div>
+        <div className="flex items-baseline justify-between mb-4">
+          <div>
+            <h3 className="font-display text-[15px] font-semibold text-zinc-100">12-Phase Pipeline</h3>
+            <p className="text-[12.5px] text-zinc-500 mt-0.5">Per-phase progress against unique units logged. Latest build per unit defines status.</p>
+          </div>
+          <div className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">
+            {stats.phasesActive} of 12 phases active
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {stats.phases.map(ph => (
+            <PhaseCard key={ph.id} phase={ph} onSelect={onSelect} />
+          ))}
+        </div>
+      </div>
+
+      {/* Recent activity */}
+      <div>
+        <div className="flex items-baseline justify-between mb-4">
+          <h3 className="font-display text-[15px] font-semibold text-zinc-100">Recent Builds</h3>
+          <div className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">Newest 6</div>
+        </div>
+        <div className="card divide-y" style={{ borderColor: 'var(--border-faint)' }}>
+          {builds.slice(0, 6).map(b => (
+            <RecentRow key={b.id} build={b} onClick={() => onSelect(b)} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({ eyebrow, title, subtitle }) {
+  return (
+    <div>
+      <div className="text-[11px] font-mono uppercase tracking-widest text-amber-300/80 mb-2">{eyebrow}</div>
+      <h2 className="font-display text-[28px] font-semibold tracking-tight text-zinc-50">{title}</h2>
+      {subtitle && <p className="text-[13.5px] text-zinc-400 mt-2">{subtitle}</p>}
+    </div>
+  );
+}
+
+function MegaStat({ label, value, sub, icon, accent, progress }) {
+  return (
+    <div className="card p-5 relative overflow-hidden">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-[10.5px] font-mono uppercase tracking-widest text-zinc-500 mb-2">{label}</div>
+          <div className={`font-display text-[30px] font-semibold leading-none ${accent ? 'gradient-text' : 'text-zinc-50'}`}>{value}</div>
+        </div>
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${accent ? 'gradient-bg text-zinc-900' : 'bg-zinc-800/60 text-zinc-300'}`}>
+          {icon}
+        </div>
+      </div>
+      {progress != null && (
+        <div className="mt-4">
+          <div className="progress-track"><div className="progress-fill" style={{ width: `${progress}%` }}></div></div>
+        </div>
+      )}
+      {sub && <div className="text-[11.5px] text-zinc-500 mt-3">{sub}</div>}
+    </div>
+  );
+}
+
+function PhaseCard({ phase, onSelect }) {
+  const pct = ratio(phase.done, phase.units || 1);
+  const isEmpty = phase.units === 0;
+  return (
+    <div className="card card-hover p-5">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center font-mono text-[12.5px] font-semibold"
+               style={{ background: isEmpty ? 'rgba(63,63,70,0.3)' : 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(251,113,133,0.18))', color: isEmpty ? '#a1a1aa' : '#fcd34d', border: isEmpty ? '1px solid var(--border-faint)' : '1px solid rgba(251,113,133,0.25)' }}>
+            P{String(phase.id).padStart(2,'0')}
+          </div>
+          <div>
+            <div className="font-display font-semibold text-[14px] text-zinc-100 leading-tight">{phase.name}</div>
+            <div className="text-[11px] text-zinc-500 mt-0.5">{phase.hint}</div>
+          </div>
+        </div>
+      </div>
+
+      {isEmpty ? (
+        <div className="py-4 text-center">
+          <div className="text-[11px] font-mono uppercase tracking-widest text-zinc-600">Not started</div>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-baseline justify-between mb-2">
+            <div className="text-[11.5px] text-zinc-400">
+              <span className="font-mono text-zinc-100 text-[13px]">{phase.done}</span>
+              <span className="text-zinc-500"> / {phase.units} units done</span>
+            </div>
+            <div className="text-[11px] font-mono text-zinc-400">{pct}%</div>
+          </div>
+          <div className="progress-track mb-3"><div className="progress-fill" style={{ width: `${pct}%` }}></div></div>
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <MiniStat label="Done" value={phase.done} tone="green" />
+            <MiniStat label="In-Prog" value={phase.inProgress} tone="amber" />
+            <MiniStat label="Blocked" value={phase.blocked} tone="red" />
+            <MiniStat label="Failed" value={phase.failed} tone={phase.failed > 0 ? 'red' : 'gray'} />
+          </div>
+          <div className="mt-3 text-[11px] flex items-center justify-between text-zinc-500">
+            <span>Tests <span className="text-zinc-300 font-mono">{phase.tests.passed}/{phase.tests.total}</span></span>
+            <span>RLS <span className="text-zinc-300 font-mono">{phase.rlsTests.passed}/{phase.rlsTests.total}</span></span>
+            {phase.latestBuild && (
+              <button onClick={() => onSelect(phase.latestBuild)} className="text-amber-300 hover:text-amber-200 inline-flex items-center gap-1">
+                v{phase.latestBuild.version}<IcArrowRight size={11} />
+              </button>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function MiniStat({ label, value, tone }) {
+  const cls = {
+    green: 'text-emerald-300',
+    amber: 'text-amber-300',
+    red: 'text-rose-300',
+    gray: 'text-zinc-400',
+  }[tone];
+  return (
+    <div className="rounded-lg py-2" style={{ background: 'rgba(11,11,17,0.4)', border: '1px solid var(--border-faint)' }}>
+      <div className={`font-mono text-[13px] font-semibold ${cls}`}>{value}</div>
+      <div className="text-[9.5px] uppercase tracking-wider text-zinc-500 mt-0.5">{label}</div>
+    </div>
+  );
+}
+
+function RecentRow({ build, onClick }) {
+  const status = overallStatus(build);
+  return (
+    <button onClick={onClick} className="w-full text-left flex items-center gap-4 px-5 py-3.5 hover:bg-zinc-800/30 transition">
+      <span className={`chip ${statusChipForOverall(status)}`}>
+        <StatusIcon status={status} /> {status.replace('_', ' ')}
+      </span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-3 min-w-0">
+          <span className="font-mono text-[12.5px] text-zinc-400">v{build.version}</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">P{String(build.phase).padStart(2,'0')}</span>
+          <span className="font-medium text-[13.5px] text-zinc-100 truncate">{build.unit || '(unnamed)'}</span>
+        </div>
+        <div className="text-[11.5px] text-zinc-500 mt-0.5 truncate">
+          {build.whatWentWell ? `+ ${build.whatWentWell}` : (build.whatWentWrong ? `! ${build.whatWentWrong}` : 'No notes')}
+        </div>
+      </div>
+      <div className="hidden sm:flex flex-col items-end gap-1">
+        <div className="flex gap-3 text-[11px]">
+          <span className="text-zinc-500">tests <span className="font-mono text-zinc-300">{build.tests.passed}/{build.tests.total}</span></span>
+          <span className="text-zinc-500">rls <span className="font-mono text-zinc-300">{build.rlsTests.passed}/{build.rlsTests.total}</span></span>
+        </div>
+        <div className="text-[10.5px] font-mono text-zinc-500">{formatRelative(build.timestamp)}</div>
+      </div>
+      <IcArrowRight size={14} className="text-zinc-500 flex-shrink-0" />
+    </button>
+  );
+}
+
+function statusChipForOverall(s) {
+  return { passed: 'chip-green', failed: 'chip-red', blocked: 'chip-amber', in_progress: 'chip-blue' }[s] || 'chip-gray';
+}
+function StatusIcon({ status, size = 11 }) {
+  if (status === 'passed') return <IcCheckCircle size={size} stroke={2} />;
+  if (status === 'failed') return <IcXCircle size={size} stroke={2} />;
+  if (status === 'blocked') return <IcAlert size={size} stroke={2} />;
+  if (status === 'in_progress') return <IcClock size={size} stroke={2} />;
+  return <IcCircle size={size} stroke={2} />;
+}
+
+/* ============================ HISTORY ============================ */
+function HistoryView({ builds, onSelect, onDelete }) {
+  const [q, setQ] = useState('');
+  const [phaseFilter, setPhaseFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortKey, setSortKey] = useState('version-desc');
+
+  const filtered = useMemo(() => {
+    const text = q.trim().toLowerCase();
+    let arr = builds.filter(b => {
+      if (phaseFilter !== 'all' && Number(b.phase) !== Number(phaseFilter)) return false;
+      if (statusFilter !== 'all' && overallStatus(b) !== statusFilter) return false;
+      if (!text) return true;
+      const hay = [
+        b.unit, b.gitSha, b.whatWentWell, b.whatWentWrong, b.blockedBy, b.nextUnit, b.migration?.file
+      ].filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(text) || (`v${b.version}`.includes(text));
+    });
+    const [k, dir] = sortKey.split('-');
+    arr.sort((a, b) => {
+      let av, bv;
+      if (k === 'version') { av = a.version || 0; bv = b.version || 0; }
+      else if (k === 'phase') { av = Number(a.phase) || 0; bv = Number(b.phase) || 0; }
+      else if (k === 'time') { av = a.timestamp || ''; bv = b.timestamp || ''; }
+      else if (k === 'unit') { av = (a.unit || '').toLowerCase(); bv = (b.unit || '').toLowerCase(); }
+      if (av < bv) return dir === 'asc' ? -1 : 1;
+      if (av > bv) return dir === 'asc' ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [builds, q, phaseFilter, statusFilter, sortKey]);
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        eyebrow="Version control"
+        title="Version History"
+        subtitle={`${builds.length} total · showing ${filtered.length} after filters`}
+      />
+
+      <div className="card p-3 flex flex-wrap items-center gap-2">
+        <div className="relative flex-1 min-w-[240px]">
+          <IcSearch size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <input
+            className="input pl-9"
+            placeholder="Search version, unit, git sha, notes…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </div>
+        <select className="select w-auto min-w-[160px]" value={phaseFilter} onChange={(e) => setPhaseFilter(e.target.value)}>
+          <option value="all">All phases</option>
+          {PHASES.map(p => <option key={p.id} value={p.id}>P{p.id} · {p.short}</option>)}
+        </select>
+        <select className="select w-auto min-w-[150px]" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="all">All statuses</option>
+          <option value="passed">Passed</option>
+          <option value="failed">Failed</option>
+          <option value="blocked">Blocked</option>
+          <option value="in_progress">In progress</option>
+        </select>
+        <select className="select w-auto min-w-[160px]" value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
+          <option value="version-desc">Version ↓ (newest)</option>
+          <option value="version-asc">Version ↑ (oldest)</option>
+          <option value="time-desc">Time ↓</option>
+          <option value="time-asc">Time ↑</option>
+          <option value="phase-asc">Phase ↑</option>
+          <option value="unit-asc">Unit A–Z</option>
+        </select>
+        {(q || phaseFilter !== 'all' || statusFilter !== 'all') && (
+          <button onClick={() => { setQ(''); setPhaseFilter('all'); setStatusFilter('all'); }} className="btn btn-ghost">
+            <IcX size={13} /> Clear
+          </button>
+        )}
+      </div>
+
+      <VirtualizedList items={filtered} onSelect={onSelect} onDelete={onDelete} />
+    </div>
+  );
+}
+
+/* Virtualized vertical list — scales to thousands */
+function VirtualizedList({ items, onSelect, onDelete }) {
+  const ROW_H = 76;
+  const BUFFER = 6;
+  const containerRef = useRef(null);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [containerH, setContainerH] = useState(800);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const onScroll = () => setScrollTop(el.scrollTop);
+    el.addEventListener('scroll', onScroll, { passive: true });
+    const ro = new ResizeObserver(() => setContainerH(el.clientHeight));
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', onScroll); ro.disconnect(); };
+  }, []);
+
+  const total = items.length;
+  const startIdx = Math.max(0, Math.floor(scrollTop / ROW_H) - BUFFER);
+  const visibleCount = Math.ceil(containerH / ROW_H) + BUFFER * 2;
+  const endIdx = Math.min(total, startIdx + visibleCount);
+  const slice = items.slice(startIdx, endIdx);
+  const offsetTop = startIdx * ROW_H;
+  const totalH = total * ROW_H;
+
+  if (total === 0) {
+    return (
+      <div className="card p-12 text-center">
+        <IcSearch size={28} className="mx-auto text-zinc-600 mb-3" />
+        <div className="font-display text-base font-semibold text-zinc-200">No builds match your filters</div>
+        <div className="text-[12.5px] text-zinc-500 mt-1">Try clearing them, or log a new build.</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card overflow-hidden">
+      <div className="px-5 py-3 border-b flex items-center text-[10.5px] font-mono uppercase tracking-widest text-zinc-500"
+           style={{ borderColor: 'var(--border-faint)' }}>
+        <span className="w-[88px]">Status</span>
+        <span className="w-[64px]">Version</span>
+        <span className="w-[56px]">Phase</span>
+        <span className="flex-1">Unit</span>
+        <span className="w-[110px] hidden md:block text-right">Tests / RLS</span>
+        <span className="w-[110px] hidden lg:block text-right">When</span>
+        <span className="w-[36px]"></span>
+      </div>
+      <div ref={containerRef} style={{ maxHeight: 'calc(100vh - 360px)', minHeight: 480, overflowY: 'auto', position: 'relative' }}>
+        <div style={{ height: totalH, position: 'relative' }}>
+          <div style={{ position: 'absolute', top: offsetTop, left: 0, right: 0 }}>
+            {slice.map(b => (
+              <HistoryRow key={b.id} build={b} height={ROW_H} onSelect={onSelect} onDelete={onDelete} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HistoryRow({ build, height, onSelect, onDelete }) {
+  const status = overallStatus(build);
+  return (
+    <div className="flex items-center px-5 border-b group hover:bg-zinc-800/25 transition"
+         style={{ height, borderColor: 'var(--border-faint)' }}>
+      <div className="w-[88px]">
+        <span className={`chip ${statusChipForOverall(status)}`}>
+          <StatusIcon status={status} /> {status === 'in_progress' ? 'In-prog' : status}
+        </span>
+      </div>
+      <button onClick={() => onSelect(build)} className="w-[64px] text-left">
+        <span className="font-mono text-[13px] font-semibold text-zinc-100">v{build.version}</span>
+      </button>
+      <div className="w-[56px]">
+        <span className="font-mono text-[11px] text-zinc-400">P{String(build.phase || '?').padStart(2,'0')}</span>
+      </div>
+      <button onClick={() => onSelect(build)} className="flex-1 min-w-0 text-left pr-3">
+        <div className="font-medium text-[13.5px] text-zinc-100 truncate">{build.unit || '(unnamed unit)'}</div>
+        <div className="text-[11.5px] text-zinc-500 truncate">
+          {build.gitSha ? <span className="font-mono">{build.gitSha.slice(0,8)} · </span> : null}
+          {build.whatWentWrong ? <span className="text-rose-300/80">! {build.whatWentWrong}</span> : (build.whatWentWell ? <span className="text-emerald-300/80">+ {build.whatWentWell}</span> : 'No notes')}
+        </div>
+      </button>
+      <div className="w-[110px] hidden md:flex flex-col items-end text-[11px]">
+        <span className="text-zinc-400 font-mono">{build.tests.passed}/{build.tests.total}</span>
+        <span className="text-zinc-500 font-mono">{build.rlsTests.passed}/{build.rlsTests.total} <span className="text-[9px]">rls</span></span>
+      </div>
+      <div className="w-[110px] hidden lg:block text-right text-[11.5px] text-zinc-500 font-mono">{formatRelative(build.timestamp)}</div>
+      <div className="w-[36px] flex justify-end">
+        <button onClick={() => onDelete(build.id)} className="p-1.5 rounded-md text-zinc-600 hover:text-rose-400 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition" aria-label="Delete">
+          <IcTrash size={14} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================ COMPARE ============================ */
+function CompareView({ builds }) {
+  const sorted = useMemo(() => [...builds].sort((a, b) => b.version - a.version), [builds]);
+  const [a, setA] = useState(sorted[0]?.id || '');
+  const [b, setB] = useState(sorted[1]?.id || sorted[0]?.id || '');
+
+  const aBuild = sorted.find(x => x.id === a);
+  const bBuild = sorted.find(x => x.id === b);
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        eyebrow="Diff engine"
+        title="Compare Versions"
+        subtitle="Pick any two builds. See what changed, what improved, and what regressed."
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <BuildPicker label="Version A" selectId={a} setSelect={setA} sorted={sorted} build={aBuild} />
+        <BuildPicker label="Version B" selectId={b} setSelect={setB} sorted={sorted} build={bBuild} />
+      </div>
+
+      {aBuild && bBuild && <DiffPanel a={aBuild} b={bBuild} />}
+      {(!aBuild || !bBuild) && (
+        <div className="card p-12 text-center">
+          <IcGitCompare size={28} className="mx-auto text-zinc-600 mb-3" />
+          <div className="text-[13px] text-zinc-400">Select two versions to compare.</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BuildPicker({ label, selectId, setSelect, sorted, build }) {
+  return (
+    <div className="card p-4">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[10.5px] font-mono uppercase tracking-widest text-zinc-500">{label}</span>
+        {build && <span className={`chip ${statusChipForOverall(overallStatus(build))}`}><StatusIcon status={overallStatus(build)} /> {overallStatus(build).replace('_',' ')}</span>}
+      </div>
+      <select className="select" value={selectId} onChange={(e) => setSelect(e.target.value)}>
+        {sorted.map(s => (
+          <option key={s.id} value={s.id}>v{s.version} · P{String(s.phase || '?').padStart(2,'0')} · {s.unit || '(unnamed)'}</option>
+        ))}
+      </select>
+      {build && (
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <DiffMiniStat label="Tests" value={`${build.tests.passed}/${build.tests.total}`} />
+          <DiffMiniStat label="RLS" value={`${build.rlsTests.passed}/${build.rlsTests.total}`} />
+          <DiffMiniStat label="Time" value={formatRelative(build.timestamp)} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DiffMiniStat({ label, value }) {
+  return (
+    <div className="rounded-lg p-2.5" style={{ background: 'rgba(11,11,17,0.4)', border: '1px solid var(--border-faint)' }}>
+      <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">{label}</div>
+      <div className="font-mono text-[12.5px] text-zinc-100 mt-0.5 truncate">{value}</div>
+    </div>
+  );
+}
+
+function DiffPanel({ a, b }) {
+  const fieldDiffs = useMemo(() => {
+    const fields = [
+      ['phase', 'Phase'],
+      ['unit', 'Unit'],
+      ['migration.status', 'Migration status'],
+      ['migration.file', 'Migration file'],
+      ['ui', 'UI status'],
+      ['committed', 'Committed'],
+      ['gitSha', 'Git SHA'],
+      ['blockedBy', 'Blocked by'],
+      ['nextUnit', 'Next unit'],
+    ];
+    return fields.map(([key, label]) => {
+      const av = getPath(a, key); const bv = getPath(b, key);
+      return { label, key, av, bv, changed: String(av || '') !== String(bv || '') };
+    });
+  }, [a, b]);
+
+  const testDelta = b.tests.passed - a.tests.passed;
+  const testTotalDelta = b.tests.total - a.tests.total;
+  const rlsDelta = b.rlsTests.passed - a.rlsTests.passed;
+  const rlsTotalDelta = b.rlsTests.total - a.rlsTests.total;
+
+  // Checklist diff
+  const checklistDiff = useMemo(() => {
+    const am = new Map((a.checklist || []).map(c => [normalizeChecklistKey(c.label), c]));
+    const bm = new Map((b.checklist || []).map(c => [normalizeChecklistKey(c.label), c]));
+    const added = [], removed = [], flipped = [], same = [];
+    for (const [k, ci] of bm) {
+      if (!am.has(k)) added.push(ci);
+      else if (am.get(k).status !== ci.status) flipped.push({ from: am.get(k), to: ci });
+      else same.push(ci);
+    }
+    for (const [k, ci] of am) {
+      if (!bm.has(k)) removed.push(ci);
+    }
+    return { added, removed, flipped, same };
+  }, [a, b]);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <DeltaCard label="Tests Δ" delta={testDelta} sub={`Total Δ ${signed(testTotalDelta)}`} />
+        <DeltaCard label="RLS Δ" delta={rlsDelta} sub={`Total Δ ${signed(rlsTotalDelta)}`} />
+        <DeltaCard label="Version Δ" delta={b.version - a.version} sub={`v${a.version} → v${b.version}`} verbatim />
+      </div>
+
+      <div className="card overflow-hidden">
+        <div className="px-5 py-3 border-b flex items-center text-[11px] font-mono uppercase tracking-widest text-zinc-500"
+             style={{ borderColor: 'var(--border-faint)' }}>
+          <span className="flex-1">Field</span>
+          <span className="w-[34%]">v{a.version}</span>
+          <span className="w-[34%]">v{b.version}</span>
+        </div>
+        {fieldDiffs.map(d => (
+          <div key={d.key} className={`flex items-stretch text-[13px] ${d.changed ? 'diff-change' : 'diff-same'} border-b px-5 py-2.5`}
+               style={{ borderColor: 'var(--border-faint)' }}>
+            <span className="flex-1 text-zinc-400">{d.label}</span>
+            <span className="w-[34%] font-mono text-zinc-300 truncate">{renderVal(d.av)}</span>
+            <span className={`w-[34%] font-mono truncate ${d.changed ? 'text-zinc-100' : 'text-zinc-500'}`}>{renderVal(d.bv)}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="card p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="font-display text-[14px] font-semibold text-zinc-100">Checklist diff</h4>
+          <div className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">
+            +{checklistDiff.added.length} added · {checklistDiff.removed.length} removed · {checklistDiff.flipped.length} flipped
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          {checklistDiff.added.map((c, i) => (
+            <div key={'a'+i} className="diff-add rounded-md px-3 py-2 text-[12.5px] flex items-center gap-2">
+              <IcPlus size={12} className="text-emerald-300" />
+              <span className="text-zinc-100">{c.label}</span>
+              <span className={`chip ${c.status === 'pass' ? 'chip-green' : 'chip-red'} ml-auto`}>{c.status}</span>
+            </div>
+          ))}
+          {checklistDiff.removed.map((c, i) => (
+            <div key={'r'+i} className="diff-remove rounded-md px-3 py-2 text-[12.5px] flex items-center gap-2">
+              <IcX size={12} className="text-rose-300" />
+              <span className="text-zinc-200">{c.label}</span>
+              <span className={`chip ${c.status === 'pass' ? 'chip-green' : 'chip-red'} ml-auto`}>{c.status}</span>
+            </div>
+          ))}
+          {checklistDiff.flipped.map((c, i) => (
+            <div key={'f'+i} className="diff-change rounded-md px-3 py-2 text-[12.5px] flex items-center gap-2">
+              <IcRefresh size={12} className="text-blue-300" />
+              <span className="text-zinc-100">{c.to.label}</span>
+              <span className="ml-auto flex items-center gap-2">
+                <span className={`chip ${c.from.status === 'pass' ? 'chip-green' : 'chip-red'}`}>{c.from.status}</span>
+                <IcArrowRight size={12} className="text-zinc-500" />
+                <span className={`chip ${c.to.status === 'pass' ? 'chip-green' : 'chip-red'}`}>{c.to.status}</span>
+              </span>
+            </div>
+          ))}
+          {checklistDiff.added.length + checklistDiff.removed.length + checklistDiff.flipped.length === 0 && (
+            <div className="text-center py-6 text-[12.5px] text-zinc-500">No checklist changes between these versions.</div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="card p-5">
+          <div className="text-[11px] font-mono uppercase tracking-widest text-zinc-500 mb-2">What went wrong — v{a.version}</div>
+          <p className="text-[13px] text-zinc-200 leading-relaxed">{a.whatWentWrong || '—'}</p>
+        </div>
+        <div className="card p-5">
+          <div className="text-[11px] font-mono uppercase tracking-widest text-zinc-500 mb-2">What went wrong — v{b.version}</div>
+          <p className={`text-[13px] leading-relaxed ${a.whatWentWrong !== b.whatWentWrong ? 'text-amber-200' : 'text-zinc-200'}`}>{b.whatWentWrong || '—'}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DeltaCard({ label, delta, sub, verbatim }) {
+  const positive = delta > 0;
+  const negative = delta < 0;
+  return (
+    <div className="card p-4">
+      <div className="text-[10.5px] font-mono uppercase tracking-widest text-zinc-500 mb-2">{label}</div>
+      <div className={`font-display text-[24px] font-semibold ${verbatim ? 'text-zinc-100' : positive ? 'text-emerald-300' : negative ? 'text-rose-300' : 'text-zinc-300'}`}>
+        {verbatim ? delta : signed(delta)}
+      </div>
+      <div className="text-[11.5px] text-zinc-500 mt-1">{sub}</div>
+    </div>
+  );
+}
+
+function signed(n) { return n > 0 ? `+${n}` : `${n}`; }
+function getPath(obj, path) { return path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj); }
+function renderVal(v) {
+  if (v === true) return 'true';
+  if (v === false) return 'false';
+  if (v == null || v === '') return '—';
+  return String(v);
+}
+function normalizeChecklistKey(s) { return (s || '').trim().toLowerCase().replace(/\s+/g, ' '); }
+
+/* =========================== CHECKLIST =========================== */
+function ChecklistView({ builds, onSelect, updateBuild }) {
+  const recurring = useMemo(() => {
+    const fails = new Map(); // label -> { count, lastSeen, lastBuild }
+    for (const b of builds) {
+      for (const c of (b.checklist || [])) {
+        if (c.status === 'fail') {
+          const k = normalizeChecklistKey(c.label);
+          const cur = fails.get(k) || { label: c.label, count: 0, builds: [] };
+          cur.count++;
+          cur.builds.push({ id: b.id, version: b.version, timestamp: b.timestamp, unit: b.unit });
+          fails.set(k, cur);
+        }
+      }
+    }
+    return Array.from(fails.values()).sort((a, b) => b.count - a.count);
+  }, [builds]);
+
+  const buildsWithList = useMemo(() => builds.filter(b => (b.checklist || []).length > 0), [builds]);
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        eyebrow="Quality gate"
+        title="Checklist"
+        subtitle={`Per-build pass/fail items, plus recurring failure roll-up across ${builds.length} builds.`}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="font-display text-[14px] font-semibold text-zinc-100 flex items-center gap-2">
+              <IcFlame size={14} className="text-rose-400" /> Recurring failures
+            </h4>
+            <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-500">{recurring.length} patterns</span>
+          </div>
+          {recurring.length === 0 ? (
+            <div className="text-center py-8">
+              <IcCheckCircle size={28} className="mx-auto text-emerald-400 mb-2" />
+              <div className="text-[13px] text-zinc-300 font-medium">No recurring failures yet</div>
+              <div className="text-[11.5px] text-zinc-500 mt-1">Log builds with failing checklist items to surface patterns.</div>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-[420px] overflow-y-auto pr-2">
+              {recurring.map((r, i) => (
+                <div key={i} className="rounded-lg p-3" style={{ background: 'rgba(248,113,113,0.04)', border: '1px solid rgba(248,113,113,0.18)' }}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-medium text-zinc-100 truncate">{r.label}</div>
+                      <div className="text-[11px] text-zinc-500 mt-0.5">
+                        {r.builds.slice(0, 4).map(b => `v${b.version}`).join(' · ')}
+                        {r.builds.length > 4 ? ` · +${r.builds.length - 4} more` : ''}
+                      </div>
+                    </div>
+                    <span className="chip chip-red font-mono">{r.count}×</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="card p-5">
+          <h4 className="font-display text-[14px] font-semibold text-zinc-100 mb-4 flex items-center gap-2">
+            <IcListChecks size={14} className="text-amber-300" /> Per-build checklists
+          </h4>
+          {buildsWithList.length === 0 ? (
+            <div className="text-center py-8">
+              <IcInfo size={26} className="mx-auto text-zinc-600 mb-2" />
+              <div className="text-[13px] text-zinc-300 font-medium">No checklists captured yet</div>
+              <div className="text-[11.5px] text-zinc-500 mt-1">Add checklist items when logging a build to track granular pass/fail.</div>
+            </div>
+          ) : (
+            <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2">
+              {buildsWithList.map(b => {
+                const pass = (b.checklist || []).filter(c => c.status === 'pass').length;
+                const tot = (b.checklist || []).length;
+                return (
+                  <button key={b.id} onClick={() => onSelect(b)} className="w-full text-left rounded-lg p-3 card-hover transition" style={{ background: 'rgba(11,11,17,0.4)', border: '1px solid var(--border-faint)' }}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono text-[12.5px] text-zinc-100 font-semibold">v{b.version}</span>
+                        <span className="text-[10.5px] font-mono uppercase tracking-widest text-zinc-500">P{String(b.phase || '?').padStart(2,'0')}</span>
+                        <span className="text-[13px] text-zinc-200 truncate">{b.unit || '(unnamed)'}</span>
+                      </div>
+                      <span className={`chip ${pass === tot ? 'chip-green' : 'chip-amber'} font-mono`}>{pass}/{tot}</span>
+                    </div>
+                    <div className="progress-track"><div className="progress-fill" style={{ width: `${ratio(pass, tot)}%` }}></div></div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================== LOG ============================== */
+function LogView({ builds, onSelect }) {
+  const items = useMemo(() => {
+    const arr = [];
+    for (const b of builds) {
+      if (b.whatWentWell) arr.push({ kind: 'good', text: b.whatWentWell, build: b });
+      if (b.whatWentWrong) arr.push({ kind: 'bad', text: b.whatWentWrong, build: b });
+      if (b.blockedBy && b.blockedBy.toLowerCase() !== 'none') arr.push({ kind: 'block', text: b.blockedBy, build: b });
+    }
+    arr.sort((a, b) => (b.build.timestamp || '').localeCompare(a.build.timestamp || ''));
+    return arr;
+  }, [builds]);
+
+  const [filter, setFilter] = useState('all');
+  const filtered = filter === 'all' ? items : items.filter(i => i.kind === filter);
+
+  return (
+    <div className="space-y-6">
+      <SectionHeader
+        eyebrow="Storytelling"
+        title="Activity Log"
+        subtitle={`${items.length} notes across ${builds.length} builds — what worked, what didn't, what's blocking.`}
+      />
+
+      <div className="flex items-center gap-2">
+        <FilterPill active={filter === 'all'} onClick={() => setFilter('all')} count={items.length}>All</FilterPill>
+        <FilterPill active={filter === 'good'} onClick={() => setFilter('good')} count={items.filter(i => i.kind === 'good').length} tone="green">Wins</FilterPill>
+        <FilterPill active={filter === 'bad'} onClick={() => setFilter('bad')} count={items.filter(i => i.kind === 'bad').length} tone="red">Issues</FilterPill>
+        <FilterPill active={filter === 'block'} onClick={() => setFilter('block')} count={items.filter(i => i.kind === 'block').length} tone="amber">Blockers</FilterPill>
+      </div>
+
+      <div className="card p-6">
+        {filtered.length === 0 ? (
+          <div className="text-center py-12">
+            <IcScroll size={28} className="mx-auto text-zinc-600 mb-3" />
+            <div className="text-[13px] text-zinc-400">No entries in this view.</div>
+          </div>
+        ) : (
+          <div className="relative pl-7">
+            <div className="absolute left-2 top-2 bottom-2 w-px" style={{ background: 'linear-gradient(180deg, transparent, var(--border-soft), transparent)' }}></div>
+            {filtered.map((it, i) => <TimelineItem key={i} item={it} onSelect={onSelect} />)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FilterPill({ active, onClick, count, tone, children }) {
+  const toneCls = active
+    ? (tone === 'green' ? 'border-emerald-500/40 text-emerald-200 bg-emerald-500/10'
+       : tone === 'red' ? 'border-rose-500/40 text-rose-200 bg-rose-500/10'
+       : tone === 'amber' ? 'border-amber-500/40 text-amber-200 bg-amber-500/10'
+       : 'border-zinc-500/40 text-zinc-100 bg-zinc-500/10')
+    : 'border-zinc-700/50 text-zinc-400 bg-transparent hover:bg-zinc-800/40';
+  return (
+    <button onClick={onClick} className={`px-3 py-1.5 rounded-full border text-[12.5px] font-medium transition flex items-center gap-2 ${toneCls}`}>
+      {children}
+      <span className="font-mono text-[10.5px] opacity-70">{count}</span>
+    </button>
+  );
+}
+
+function TimelineItem({ item, onSelect }) {
+  const tone = item.kind === 'good' ? { dot: 'bg-emerald-400', label: 'WIN', cls: 'chip-green', icon: <IcCheckCircle size={12} stroke={2} /> }
+            : item.kind === 'bad' ? { dot: 'bg-rose-400', label: 'ISSUE', cls: 'chip-red', icon: <IcXCircle size={12} stroke={2} /> }
+            : { dot: 'bg-amber-400', label: 'BLOCKED BY', cls: 'chip-amber', icon: <IcAlert size={12} stroke={2} /> };
+  return (
+    <div className="relative pb-5 fade-in">
+      <span className={`absolute -left-[1.55rem] top-1.5 w-2.5 h-2.5 rounded-full ${tone.dot}`} style={{ boxShadow: '0 0 0 4px var(--bg-deep)' }}></span>
+      <div className="flex items-center gap-2 mb-1.5">
+        <span className={`chip ${tone.cls}`}>{tone.icon} {tone.label}</span>
+        <button onClick={() => onSelect(item.build)} className="font-mono text-[11.5px] text-zinc-400 hover:text-amber-300 transition">
+          v{item.build.version} · P{String(item.build.phase || '?').padStart(2,'0')} · {item.build.unit || '(unnamed)'}
+        </button>
+        <span className="text-[11px] text-zinc-500 ml-auto font-mono">{formatRelative(item.build.timestamp)}</span>
+      </div>
+      <p className="text-[13.5px] text-zinc-100 leading-relaxed">{item.text}</p>
+    </div>
+  );
+}
+
+/* ========================== ADD MODAL ============================ */
+function AddBuildModal({ defaultVersion, onClose, onSubmit }) {
+  const [data, setData] = useState({
+    version: defaultVersion,
+    phase: 1,
+    unit: '',
+    migrationStatus: 'Pending',
+    migrationFile: '',
+    testsPassed: 0,
+    testsTotal: 0,
+    rlsPassed: 0,
+    rlsTotal: 0,
+    ui: 'Pending',
+    committed: false,
+    gitSha: '',
+    whatWentWell: '',
+    whatWentWrong: '',
+    blockedBy: '',
+    nextUnit: '',
+    checklist: [],
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const setF = (k, v) => setData(d => ({ ...d, [k]: v }));
+
+  const addItem = () => setF('checklist', [...data.checklist, { label: '', status: 'pass' }]);
+  const updateItem = (i, patch) => setF('checklist', data.checklist.map((c, idx) => idx === i ? { ...c, ...patch } : c));
+  const removeItem = (i) => setF('checklist', data.checklist.filter((_, idx) => idx !== i));
+
+  const handle = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const payload = {
+      version: Number(data.version) || defaultVersion,
+      phase: Number(data.phase),
+      unit: data.unit.trim(),
+      migration: { status: data.migrationStatus, file: data.migrationFile.trim() },
+      tests: { passed: Number(data.testsPassed) || 0, total: Number(data.testsTotal) || 0 },
+      rlsTests: { passed: Number(data.rlsPassed) || 0, total: Number(data.rlsTotal) || 0 },
+      ui: data.ui,
+      committed: !!data.committed,
+      gitSha: data.gitSha.trim(),
+      whatWentWell: data.whatWentWell.trim(),
+      whatWentWrong: data.whatWentWrong.trim(),
+      blockedBy: data.blockedBy.trim(),
+      nextUnit: data.nextUnit.trim(),
+      checklist: data.checklist.filter(c => c.label.trim()).map(c => ({ label: c.label.trim(), status: c.status })),
+    };
+    await onSubmit(payload);
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="modal-backdrop fade-in" onClick={onClose}>
+      <form onSubmit={handle} className="modal-panel scale-in" onClick={(e) => e.stopPropagation()}>
+        <ModalHeader title="Log new build" subtitle="All fields map to the STATUS BLOCK contract." onClose={onClose} version={data.version} />
+        <div className="p-6 space-y-5">
+          <Row>
+            <Field label="Version" hint="Auto-incremented">
+              <input type="number" min="1" className="input" value={data.version} onChange={(e) => setF('version', e.target.value)} />
+            </Field>
+            <Field label="Phase" hint="1–12">
+              <select className="select" value={data.phase} onChange={(e) => setF('phase', e.target.value)}>
+                {PHASES.map(p => <option key={p.id} value={p.id}>P{p.id} · {p.name}</option>)}
+              </select>
+            </Field>
+            <Field label="Unit" hint="Short name" wide>
+              <input className="input" placeholder="e.g. tenants_table" value={data.unit} onChange={(e) => setF('unit', e.target.value)} />
+            </Field>
+          </Row>
+
+          <Row>
+            <Field label="Migration status">
+              <select className="select" value={data.migrationStatus} onChange={(e) => setF('migrationStatus', e.target.value)}>
+                {MIGRATION_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </Field>
+            <Field label="Migration file" wide>
+              <input className="input font-mono" placeholder="0021_tenants.sql" value={data.migrationFile} onChange={(e) => setF('migrationFile', e.target.value)} />
+            </Field>
+            <Field label="UI">
+              <select className="select" value={data.ui} onChange={(e) => setF('ui', e.target.value)}>
+                {UI_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </Field>
+          </Row>
+
+          <Row>
+            <Field label="Tests passed">
+              <input type="number" min="0" className="input" value={data.testsPassed} onChange={(e) => setF('testsPassed', e.target.value)} />
+            </Field>
+            <Field label="Tests total">
+              <input type="number" min="0" className="input" value={data.testsTotal} onChange={(e) => setF('testsTotal', e.target.value)} />
+            </Field>
+            <Field label="RLS passed">
+              <input type="number" min="0" className="input" value={data.rlsPassed} onChange={(e) => setF('rlsPassed', e.target.value)} />
+            </Field>
+            <Field label="RLS total">
+              <input type="number" min="0" className="input" value={data.rlsTotal} onChange={(e) => setF('rlsTotal', e.target.value)} />
+            </Field>
+          </Row>
+
+          <Row>
+            <Field label="Committed" hint="Tick if SHA exists">
+              <label className="flex items-center gap-2 input cursor-pointer">
+                <input type="checkbox" checked={data.committed} onChange={(e) => setF('committed', e.target.checked)} />
+                <span className="text-[12.5px] text-zinc-300">{data.committed ? 'Yes' : 'Pending'}</span>
+              </label>
+            </Field>
+            <Field label="Git SHA" wide>
+              <input className="input font-mono" placeholder="e.g. 9f8a2b1" value={data.gitSha} onChange={(e) => setF('gitSha', e.target.value)} />
+            </Field>
+            <Field label="Next unit">
+              <input className="input" placeholder="tenant_users" value={data.nextUnit} onChange={(e) => setF('nextUnit', e.target.value)} />
+            </Field>
+          </Row>
+
+          <Field label="What went well">
+            <textarea className="textarea" rows="2" value={data.whatWentWell} onChange={(e) => setF('whatWentWell', e.target.value)} placeholder="One line — what worked" />
+          </Field>
+          <Field label="What went wrong">
+            <textarea className="textarea" rows="2" value={data.whatWentWrong} onChange={(e) => setF('whatWentWrong', e.target.value)} placeholder='One line — or "nothing"' />
+          </Field>
+          <Field label="Blocked by">
+            <input className="input" placeholder='Dependency or "none"' value={data.blockedBy} onChange={(e) => setF('blockedBy', e.target.value)} />
+          </Field>
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-400">Checklist (pass/fail items)</span>
+              <button type="button" onClick={addItem} className="btn btn-ghost text-[12px] px-2.5 py-1.5">
+                <IcPlus size={13} /> Add item
+              </button>
+            </div>
+            {data.checklist.length === 0 ? (
+              <div className="text-center py-4 rounded-lg" style={{ background: 'rgba(11,11,17,0.4)', border: '1px dashed var(--border-faint)' }}>
+                <span className="text-[12px] text-zinc-500">No checklist items. Add as many as you need.</span>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {data.checklist.map((c, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input className="input flex-1" placeholder="Item label" value={c.label} onChange={(e) => updateItem(i, { label: e.target.value })} />
+                    <select className="select w-[110px]" value={c.status} onChange={(e) => updateItem(i, { status: e.target.value })}>
+                      <option value="pass">Pass</option>
+                      <option value="fail">Fail</option>
+                    </select>
+                    <button type="button" onClick={() => removeItem(i)} className="p-2 rounded-md text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition"><IcTrash size={14} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="p-5 border-t flex items-center justify-end gap-2 sticky bottom-0" style={{ borderColor: 'var(--border-faint)', background: 'rgba(17,17,26,0.95)' }}>
+          <button type="button" onClick={onClose} className="btn btn-ghost">Cancel</button>
+          <button type="submit" disabled={submitting} className="btn btn-primary">
+            {submitting ? 'Saving…' : <><IcCheck size={14} /> Save build</>}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function Row({ children }) {
+  return <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">{children}</div>;
+}
+function Field({ label, hint, wide, children }) {
+  return (
+    <label className={`block ${wide ? 'sm:col-span-2' : ''}`}>
+      <div className="flex items-baseline justify-between mb-1.5">
+        <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-400">{label}</span>
+        {hint && <span className="text-[10.5px] text-zinc-500">{hint}</span>}
+      </div>
+      {children}
+    </label>
+  );
+}
+
+function ModalHeader({ title, subtitle, onClose, version }) {
+  return (
+    <div className="p-5 border-b flex items-start justify-between sticky top-0 z-10" style={{ borderColor: 'var(--border-faint)', background: 'rgba(17,17,26,0.95)', backdropFilter: 'blur(10px)' }}>
+      <div>
+        <h3 className="font-display text-[17px] font-semibold text-zinc-100 flex items-center gap-2">
+          {title}
+          {version != null && <span className="chip chip-coral">v{version}</span>}
+        </h3>
+        {subtitle && <p className="text-[12.5px] text-zinc-500 mt-1">{subtitle}</p>}
+      </div>
+      <button onClick={onClose} className="p-2 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition"><IcX size={16} /></button>
+    </div>
+  );
+}
+
+/* ========================= PASTE MODAL =========================== */
+function PasteLogModal({ defaultVersion, onClose, onSubmit }) {
+  const [text, setText] = useState('');
+  const [parsed, setParsed] = useState(null);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const sampleText = `### BUILD STATUS
+phase: 1
+unit: tenants_table
+version: v${defaultVersion}
+migration: Done — 0001_tenants.sql
+tests: 6/6
+rls_tests: 4/4
+ui: Done
+committed: 9f8a2b1c
+what_went_well: clean RLS pair, no edge issues
+what_went_wrong: nothing
+blocked_by: none
+next_unit: tenant_users`;
+
+  useEffect(() => {
+    if (!text.trim()) { setParsed(null); setError(''); return; }
+    try {
+      const p = parseStatusBlock(text);
+      if (!p || !p.unit) { setError('Could not detect any STATUS BLOCK fields. Format is `key: value`.'); setParsed(null); return; }
+      setError('');
+      setParsed(p);
+    } catch (e) {
+      setError(e.message); setParsed(null);
+    }
+  }, [text]);
+
+  const submit = async () => {
+    if (!parsed) return;
+    setSubmitting(true);
+    const payload = { ...parsed, version: parsed.version || defaultVersion, checklist: [] };
+    await onSubmit(payload);
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="modal-backdrop fade-in" onClick={onClose}>
+      <div className="modal-panel scale-in" onClick={(e) => e.stopPropagation()}>
+        <ModalHeader title="Paste status block" subtitle="Paste the STATUS BLOCK Claude printed at the end of a unit. We parse every field." onClose={onClose} />
+        <div className="p-6 space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-400">Raw input</span>
+                <button onClick={() => setText(sampleText)} className="text-[11.5px] text-amber-300 hover:text-amber-200">Insert sample</button>
+              </div>
+              <textarea
+                className="textarea"
+                style={{ minHeight: 320 }}
+                placeholder={sampleText}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                autoFocus
+              />
+              {error && (
+                <div className="mt-2 text-[12px] text-rose-300 flex items-center gap-2">
+                  <IcAlert size={13} /> {error}
+                </div>
+              )}
+            </div>
+            <div>
+              <div className="text-[11px] font-mono uppercase tracking-widest text-zinc-400 mb-2">Parsed preview</div>
+              <div className="rounded-xl p-4 space-y-2.5" style={{ background: 'rgba(11,11,17,0.5)', border: '1px solid var(--border-faint)' }}>
+                {!parsed ? (
+                  <div className="text-center py-10">
+                    <IcClipboard size={26} className="mx-auto text-zinc-600 mb-2" />
+                    <div className="text-[12.5px] text-zinc-500">Paste a STATUS BLOCK to preview the entry.</div>
+                  </div>
+                ) : (
+                  <>
+                    <KV k="Phase" v={`P${String(parsed.phase || '?').padStart(2,'0')}`} />
+                    <KV k="Unit" v={parsed.unit || '—'} />
+                    <KV k="Version" v={`v${parsed.version || defaultVersion}`} />
+                    <KV k="Migration" v={`${parsed.migration.status}${parsed.migration.file ? ' — ' + parsed.migration.file : ''}`} />
+                    <KV k="Tests" v={`${parsed.tests.passed}/${parsed.tests.total}`} />
+                    <KV k="RLS tests" v={`${parsed.rlsTests.passed}/${parsed.rlsTests.total}`} />
+                    <KV k="UI" v={parsed.ui} />
+                    <KV k="Committed" v={parsed.committed ? parsed.gitSha : 'pending'} />
+                    <KV k="Went well" v={parsed.whatWentWell || '—'} dim />
+                    <KV k="Went wrong" v={parsed.whatWentWrong || '—'} dim />
+                    <KV k="Blocked by" v={parsed.blockedBy || 'none'} dim />
+                    <KV k="Next unit" v={parsed.nextUnit || '—'} dim />
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="p-5 border-t flex items-center justify-between" style={{ borderColor: 'var(--border-faint)', background: 'rgba(17,17,26,0.95)' }}>
+          <div className="text-[11.5px] text-zinc-500">
+            {parsed ? <span className="flex items-center gap-2"><IcCheckCircle size={13} className="text-emerald-400" /> Block parsed cleanly</span> : <span>Waiting for valid block…</span>}
+          </div>
+          <div className="flex gap-2">
+            <button onClick={onClose} className="btn btn-ghost">Cancel</button>
+            <button onClick={submit} disabled={!parsed || submitting} className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
+              {submitting ? 'Saving…' : <><IcCheck size={14} /> Log build</>}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KV({ k, v, dim }) {
+  return (
+    <div className="flex items-baseline gap-3 text-[12.5px]">
+      <span className="w-[100px] flex-shrink-0 text-zinc-500 font-mono text-[10.5px] uppercase tracking-widest">{k}</span>
+      <span className={`flex-1 font-mono ${dim ? 'text-zinc-400' : 'text-zinc-100'}`}>{v}</span>
+    </div>
+  );
+}
+
+/* ======================== IMPORT / CLEAR ========================= */
+function ImportModal({ onClose, onImport, buildsCount }) {
+  const [file, setFile] = useState(null);
+  const [mode, setMode] = useState('merge');
+  const ref = useRef();
+
+  return (
+    <div className="modal-backdrop fade-in" onClick={onClose}>
+      <div className="modal-panel scale-in" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
+        <ModalHeader title="Import build log" subtitle="JSON file exported from this dashboard or compatible source." onClose={onClose} />
+        <div className="p-6 space-y-5">
+          <button onClick={() => ref.current?.click()}
+                  className="w-full p-8 rounded-xl border-2 border-dashed text-center transition hover:bg-zinc-800/30"
+                  style={{ borderColor: file ? 'rgba(251,113,133,0.4)' : 'var(--border-faint)' }}>
+            <IcUpload size={24} className="mx-auto text-zinc-400 mb-2" />
+            <div className="text-[13.5px] text-zinc-200 font-medium">{file ? file.name : 'Click to choose a .json file'}</div>
+            <div className="text-[11.5px] text-zinc-500 mt-1">{file ? `${(file.size/1024).toFixed(1)} KB` : 'Drop or click here'}</div>
+            <input ref={ref} type="file" accept="application/json,.json" hidden onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          </button>
+
+          <div>
+            <div className="text-[11px] font-mono uppercase tracking-widest text-zinc-400 mb-2">Conflict mode</div>
+            <div className="grid grid-cols-2 gap-2">
+              <label className={`p-3 rounded-lg cursor-pointer transition ${mode === 'merge' ? 'ring-coral' : ''}`}
+                     style={{ background: 'rgba(11,11,17,0.4)', border: `1px solid ${mode === 'merge' ? 'rgba(251,113,133,0.4)' : 'var(--border-faint)'}` }}>
+                <input type="radio" name="mode" checked={mode === 'merge'} onChange={() => setMode('merge')} className="hidden" />
+                <div className="font-medium text-[13px] text-zinc-100">Merge</div>
+                <div className="text-[11.5px] text-zinc-500 mt-0.5">Add or update; keep your existing {buildsCount} record{buildsCount === 1 ? '' : 's'}.</div>
+              </label>
+              <label className={`p-3 rounded-lg cursor-pointer transition ${mode === 'replace' ? 'ring-coral' : ''}`}
+                     style={{ background: 'rgba(11,11,17,0.4)', border: `1px solid ${mode === 'replace' ? 'rgba(251,113,133,0.4)' : 'var(--border-faint)'}` }}>
+                <input type="radio" name="mode" checked={mode === 'replace'} onChange={() => setMode('replace')} className="hidden" />
+                <div className="font-medium text-[13px] text-rose-300">Replace</div>
+                <div className="text-[11.5px] text-zinc-500 mt-0.5">Delete all current records, then load imported set.</div>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div className="p-5 border-t flex justify-end gap-2" style={{ borderColor: 'var(--border-faint)' }}>
+          <button onClick={onClose} className="btn btn-ghost">Cancel</button>
+          <button onClick={() => file && onImport(file, mode)} disabled={!file} className="btn btn-primary disabled:opacity-50">Import</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmModal({ title, description, confirmLabel, cancelLabel = 'Cancel', danger, onConfirm, onCancel }) {
+  const [typed, setTyped] = useState('');
+  const need = 'DELETE';
+  const enabled = !danger || typed === need;
+  return (
+    <div className="modal-backdrop fade-in" onClick={onCancel}>
+      <div className="modal-panel scale-in" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+        <div className="p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${danger ? 'bg-rose-500/10 text-rose-300' : 'bg-amber-500/10 text-amber-300'}`}>
+              <IcAlert size={20} />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-display text-[16px] font-semibold text-zinc-100">{title}</h3>
+              <p className="text-[13px] text-zinc-400 mt-1 leading-relaxed">{description}</p>
+            </div>
+          </div>
+          {danger && (
+            <div className="mb-4">
+              <div className="text-[11px] font-mono uppercase tracking-widest text-zinc-500 mb-1">Type <span className="text-rose-300">{need}</span> to confirm</div>
+              <input className="input font-mono" value={typed} onChange={(e) => setTyped(e.target.value)} placeholder={need} />
+            </div>
+          )}
+        </div>
+        <div className="p-5 border-t flex justify-end gap-2" style={{ borderColor: 'var(--border-faint)' }}>
+          <button onClick={onCancel} className="btn btn-ghost">{cancelLabel}</button>
+          <button onClick={onConfirm} disabled={!enabled} className={`${danger ? 'btn btn-danger' : 'btn btn-primary'} disabled:opacity-40 disabled:cursor-not-allowed`}>
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ========================= DETAIL DRAWER ========================= */
+function DetailDrawer({ build, onClose, onUpdate, onDelete }) {
+  const [draft, setDraft] = useState(build);
+  useEffect(() => { setDraft(build); }, [build.id]);
+  const status = overallStatus(build);
+  return (
+    <>
+      <div className="drawer-backdrop fade-in" onClick={onClose}></div>
+      <aside className="drawer-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="p-5 border-b sticky top-0 z-10" style={{ borderColor: 'var(--border-faint)', background: 'var(--bg-elev)', backdropFilter: 'blur(10px)' }}>
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className={`chip ${statusChipForOverall(status)}`}><StatusIcon status={status} /> {status.replace('_',' ')}</span>
+                <span className="chip chip-coral">v{build.version}</span>
+                <span className="chip chip-gray">P{String(build.phase || '?').padStart(2,'0')}</span>
+              </div>
+              <h3 className="font-display text-[18px] font-semibold text-zinc-50">{build.unit || '(unnamed unit)'}</h3>
+              <p className="text-[11.5px] text-zinc-500 mt-1 font-mono">{formatDate(build.timestamp)}</p>
+            </div>
+            <button onClick={onClose} className="p-2 rounded-md text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/60 transition"><IcX size={16} /></button>
+          </div>
+        </div>
+        <div className="p-5 space-y-5">
+          <div className="grid grid-cols-3 gap-3">
+            <DetailMetric label="Tests" value={`${build.tests.passed}/${build.tests.total}`} pct={ratio(build.tests.passed, build.tests.total)} />
+            <DetailMetric label="RLS" value={`${build.rlsTests.passed}/${build.rlsTests.total}`} pct={ratio(build.rlsTests.passed, build.rlsTests.total)} />
+            <DetailMetric label="UI" value={build.ui} />
+          </div>
+          <DetailGroup title="Migration">
+            <KV k="Status" v={<span className={`chip ${statusChipClass(build.migration?.status)}`}>{build.migration?.status || '—'}</span>} />
+            <KV k="File" v={build.migration?.file || '—'} />
+          </DetailGroup>
+          <DetailGroup title="Commit">
+            <KV k="Committed" v={build.committed ? <span className="chip chip-green">yes</span> : <span className="chip chip-gray">pending</span>} />
+            <KV k="Git SHA" v={build.gitSha || '—'} />
+          </DetailGroup>
+          <DetailGroup title="Outcomes">
+            <KV k="Went well" v={build.whatWentWell || '—'} dim />
+            <KV k="Went wrong" v={build.whatWentWrong || '—'} dim />
+            <KV k="Blocked by" v={build.blockedBy || 'none'} dim />
+            <KV k="Next unit" v={build.nextUnit || '—'} dim />
+          </DetailGroup>
+          <DetailGroup title={`Checklist · ${build.checklist?.length || 0} items`}>
+            {(!build.checklist || build.checklist.length === 0) ? (
+              <div className="text-[12.5px] text-zinc-500">No checklist items captured.</div>
+            ) : (
+              <div className="space-y-1.5">
+                {build.checklist.map((c, i) => (
+                  <div key={i} className="flex items-center justify-between rounded-md px-3 py-2" style={{ background: 'rgba(11,11,17,0.4)', border: '1px solid var(--border-faint)' }}>
+                    <span className="text-[12.5px] text-zinc-200 flex items-center gap-2">
+                      {c.status === 'pass' ? <IcCheckCircle size={13} className="text-emerald-400" /> : <IcXCircle size={13} className="text-rose-400" />}
+                      {c.label}
+                    </span>
+                    <span className={`chip ${c.status === 'pass' ? 'chip-green' : 'chip-red'}`}>{c.status}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </DetailGroup>
+        </div>
+        <div className="p-5 border-t flex justify-between sticky bottom-0" style={{ borderColor: 'var(--border-faint)', background: 'var(--bg-elev)' }}>
+          <button onClick={onDelete} className="btn btn-danger"><IcTrash size={14} /> Delete</button>
+          <button onClick={onClose} className="btn btn-ghost">Close</button>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+function DetailGroup({ title, children }) {
+  return (
+    <div className="card p-4">
+      <div className="text-[10.5px] font-mono uppercase tracking-widest text-zinc-500 mb-3">{title}</div>
+      <div className="space-y-2.5">{children}</div>
+    </div>
+  );
+}
+
+function DetailMetric({ label, value, pct }) {
+  return (
+    <div className="card p-3">
+      <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mb-1">{label}</div>
+      <div className="font-display text-[16px] font-semibold text-zinc-100">{value}</div>
+      {pct != null && <div className="progress-track mt-2"><div className="progress-fill" style={{ width: `${pct}%` }}></div></div>}
+    </div>
+  );
+}
+
+/* ============================ TOAST ============================== */
+function Toast({ msg, kind }) {
+  const cls = kind === 'error' ? 'border-rose-500/40 text-rose-200'
+            : kind === 'success' ? 'border-emerald-500/40 text-emerald-200'
+            : 'border-zinc-700 text-zinc-200';
+  const I = kind === 'error' ? IcXCircle : kind === 'success' ? IcCheckCircle : IcInfo;
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[200] scale-in">
+      <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border ${cls}`}
+           style={{ background: 'rgba(17,17,26,0.95)', backdropFilter: 'blur(10px)', boxShadow: '0 12px 32px -8px rgba(0,0,0,0.6)' }}>
+        <I size={15} />
+        <span className="text-[13px]">{msg}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ============================ MOUNT ============================== */
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

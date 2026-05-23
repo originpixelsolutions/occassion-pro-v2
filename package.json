@@ -1,0 +1,33 @@
+{
+  "name": "occasionpro",
+  "version": "0.0.1",
+  "private": true,
+  "description": "OccasionPro — multi-tenant event-management SaaS. Built strictly to OCCASIONPRO_MASTER_PLAN_V2.md.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:rls": "vitest run --reporter=verbose tests/rls",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.36.4",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.2.17",
+    "@types/node": "^22.19.19",
+    "dotenv": "^16.6.1",
+    "drizzle-kit": "^0.30.6",
+    "tsx": "^4.22.3",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
