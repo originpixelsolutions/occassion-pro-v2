@@ -7,3 +7,4 @@ export * from './super-admins.js';
 export * from './super-admin-role-permissions.js';
 export * from './platform-settings.js';
 export * from './platform-theme-config.js';
+export * from './platform-theme-history.js';
