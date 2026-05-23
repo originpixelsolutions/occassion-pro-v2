@@ -15,11 +15,11 @@ CREATE TABLE super_admin_role_permissions (
   capability      text        NOT NULL CHECK (length(trim(capability)) > 0),
 
   -- Is the action allowed at all for this role?
-  granted         boolean     NOT NULL DEFAULT false,
+  granted         boolean     NOT NULL DEFAULT FALSE,
 
   -- Spec 2.9.4: ✓† in the matrix means the action requires two-person
   -- approval (initiator + approver). Bypassed in Sole Operator Mode.
-  needs_approval  boolean     NOT NULL DEFAULT false,
+  needs_approval  boolean     NOT NULL DEFAULT FALSE,
 
   -- Free-form qualifier from the matrix footnotes (e.g. 'incident',
   -- 'reason_required', 'self_limit_inr_50k', '<=admin'). Kept as text so
@@ -38,12 +38,12 @@ CREATE TABLE super_admin_role_permissions (
 -- "Which roles can do X?" lookup. Partial — only granted rows matter.
 CREATE INDEX idx_sarp_capability_granted
   ON super_admin_role_permissions (capability)
-  WHERE granted = true;
+  WHERE granted = TRUE;
 
 -- "Which capabilities for this role require approval?"
 CREATE INDEX idx_sarp_role_needs_approval
   ON super_admin_role_permissions (role)
-  WHERE granted = true AND needs_approval = true;
+  WHERE granted = TRUE AND needs_approval = TRUE;
 
 CREATE OR REPLACE FUNCTION sarp_set_updated_at()
 RETURNS trigger LANGUAGE plpgsql AS $fn$
@@ -61,5 +61,5 @@ ALTER TABLE super_admin_role_permissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE super_admin_role_permissions FORCE ROW LEVEL SECURITY;
 
 COMMENT ON TABLE  super_admin_role_permissions             IS 'Permission matrix for super_admins (spec 2.9.3). Composite PK (role, capability). Rows seeded in Phase 12.';
-COMMENT ON COLUMN super_admin_role_permissions.needs_approval IS 'Spec 2.9.4: true = two-person approval required (initiator + approver). Bypassed in Sole Operator Mode.';
+COMMENT ON COLUMN super_admin_role_permissions.needs_approval IS 'Spec 2.9.4: TRUE = two-person approval required (initiator + approver). Bypassed in Sole Operator Mode.';
 COMMENT ON COLUMN super_admin_role_permissions.conditional IS 'Free-form qualifier from matrix footnotes; e.g. incident, reason_required, self_limit_inr_50k.';

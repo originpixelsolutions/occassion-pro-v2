@@ -10,18 +10,18 @@ CREATE TABLE platform_settings (
   id                          smallint    PRIMARY KEY DEFAULT 1
                                           CHECK (id = 1),
 
-  -- Spec 2.9.2: starts true on a fresh install (one owner exists).
-  -- Flipped to false by the Phase 11 trigger when a second owner/admin
+  -- Spec 2.9.2: starts TRUE on a fresh install (one owner exists).
+  -- Flipped to FALSE by the Phase 11 trigger when a second owner/admin
   -- is added. Cannot be re-enabled.
-  sole_operator_mode          boolean     NOT NULL DEFAULT true,
+  sole_operator_mode          boolean     NOT NULL DEFAULT TRUE,
   sole_operator_disabled_at   timestamptz,
 
   -- Invariant: once disabled, the disabled_at timestamp must exist;
-  -- and a disabled row must not advertise sole_operator_mode = true.
+  -- and a disabled row must not advertise sole_operator_mode = TRUE.
   CHECK (
-    (sole_operator_mode = true  AND sole_operator_disabled_at IS NULL)
+    (sole_operator_mode = TRUE  AND sole_operator_disabled_at IS NULL)
     OR
-    (sole_operator_mode = false AND sole_operator_disabled_at IS NOT NULL)
+    (sole_operator_mode = FALSE AND sole_operator_disabled_at IS NOT NULL)
   ),
 
   created_at                  timestamptz NOT NULL DEFAULT now(),
@@ -47,5 +47,5 @@ ALTER TABLE platform_settings FORCE ROW LEVEL SECURITY;
 INSERT INTO platform_settings (id) VALUES (1);
 
 COMMENT ON TABLE  platform_settings                          IS 'Singleton platform config. Exactly one row, id = 1. Holds Sole Operator Mode (spec 2.9.2) and future global settings.';
-COMMENT ON COLUMN platform_settings.sole_operator_mode       IS 'Spec 2.9.2: true on fresh install. Flipped false (one-way) by Phase 11 trigger when a second owner/admin is added.';
+COMMENT ON COLUMN platform_settings.sole_operator_mode       IS 'Spec 2.9.2: TRUE on fresh install. Flipped FALSE (one-way) by Phase 11 trigger when a second owner/admin is added.';
 COMMENT ON COLUMN platform_settings.sole_operator_disabled_at IS 'Set by Phase 11 trigger at the moment Sole Operator Mode auto-disables.';

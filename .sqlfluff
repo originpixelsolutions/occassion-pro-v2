@@ -1,8 +1,25 @@
+# SQLFluff config (v3.x). Postgres dialect.
+#
+# Correctness rules stay on (capitalisation, naming, references, conventions,
+# ambiguity, structure). Layout-only rules are relaxed where they fight the
+# project's column-aligned migration style; SQLFluff is here to catch real
+# bugs, not enforce alignment.
+
 [sqlfluff]
 dialect = postgres
 templater = raw
-exclude_rules = L016,L031,L034,L036
 max_line_length = 120
+
+# Layout (cosmetic):
+#   LT01 single-space spacing (kills column alignment)
+#   LT02 indent levels (kills aligned trailing comments)
+#   LT05 long-line splitting (we set max_line_length above)
+#   LT09 select-targets layout (n/a for DDL)
+#   LT12 require trailing newline (handled by Prettier elsewhere)
+# Structure / style we explicitly do not enforce yet:
+#   ST06 select-target ordering (n/a for DDL)
+#   AM04 wildcard-in-select (n/a for DDL)
+exclude_rules = LT01,LT02,LT05,LT09,LT12,ST06,AM04
 
 [sqlfluff:rules:capitalisation.keywords]
 capitalisation_policy = upper

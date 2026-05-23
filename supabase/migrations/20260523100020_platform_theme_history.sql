@@ -16,7 +16,7 @@ CREATE TABLE platform_theme_history (
   -- Frozen copy of platform_theme_config at the moment of publish.
   -- Stored as jsonb so a single row captures every token regardless
   -- of how the column set evolves over time. CHECK ensures the
-  -- snapshot is a JSON object (not array / scalar / null).
+  -- snapshot is a JSON object (not array / scalar / NULL).
   snapshot      jsonb       NOT NULL CHECK (jsonb_typeof(snapshot) = 'object'),
 
   -- Audit identity. ON DELETE RESTRICT because the table is append-only:

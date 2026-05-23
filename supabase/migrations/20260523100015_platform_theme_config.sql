@@ -10,7 +10,7 @@
 -- Reusable domain: 6-digit hex color. Used here and in 0005, plus the
 -- tenant white-label override columns in a later Phase 2 migration.
 CREATE DOMAIN hex_color AS text
-  CHECK (VALUE ~ '^#[0-9A-Fa-f]{6}$');
+  CHECK (value ~ '^#[0-9A-Fa-f]{6}$');
 
 CREATE TABLE platform_theme_config (
   id                          integer     PRIMARY KEY DEFAULT 1
