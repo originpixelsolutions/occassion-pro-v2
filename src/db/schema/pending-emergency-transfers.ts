@@ -4,24 +4,14 @@ import { tenants } from './tenants.js';
 import { tenantMembers } from './tenant-members.js';
 import { superAdmins } from './super-admins.js';
 
-export const DISPUTE_CHANNELS = [
-  'email',
-  'phone',
-  'support_ticket',
-  'legal_notice',
-  'other',
-] as const;
+export const DISPUTE_CHANNELS = ['email','phone','support_ticket','legal_notice','other'] as const;
 export type DisputeChannel = (typeof DISPUTE_CHANNELS)[number];
 
 export const pendingEmergencyTransfers = pgTable(
   'pending_emergency_transfers',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
     currentOwnerId: uuid('current_owner_id')
       .notNull()
       .references(() => tenantMembers.id, { onDelete: 'restrict' }),
@@ -33,9 +23,7 @@ export const pendingEmergencyTransfers = pgTable(
     initiatedByAdmin: uuid('initiated_by_admin')
       .notNull()
       .references(() => superAdmins.id, { onDelete: 'restrict' }),
-    initiatedAt: timestamp('initiated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    initiatedAt: timestamp('initiated_at', { withTimezone: true }).notNull().default(sql`now()`),
     disputeWindowEnd: timestamp('dispute_window_end', { withTimezone: true }).notNull(),
     disputedAt: timestamp('disputed_at', { withTimezone: true }),
     disputeChannel: text('dispute_channel').$type<DisputeChannel>(),
@@ -49,7 +37,10 @@ export const pendingEmergencyTransfers = pgTable(
   },
   (t) => ({
     reasonLen: check('pet_reason_len', sql`length(trim(${t.reason})) BETWEEN 20 AND 2000`),
-    differentOwners: check('pet_owners_differ', sql`${t.currentOwnerId} <> ${t.proposedOwnerId}`),
+    differentOwners: check(
+      'pet_owners_differ',
+      sql`${t.currentOwnerId} <> ${t.proposedOwnerId}`,
+    ),
     disputeWindowFuture: check(
       'pet_dispute_window_future',
       sql`${t.disputeWindowEnd} > ${t.initiatedAt}`,
