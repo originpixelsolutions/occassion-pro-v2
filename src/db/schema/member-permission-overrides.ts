@@ -11,10 +11,14 @@ import {
 } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 import { tenantMembers } from './tenant-members.js';
-import { PERMISSION_MODULES, type PermissionModule } from './module-permissions.js';
+import type { PermissionModule } from './module-permissions.js';
 
-export { PERMISSION_MODULES, type PermissionModule };
-
+/**
+ * Per-member NULLABLE override on module_permissions.
+ *   NULL  = inherit role default
+ *   true  = explicit grant
+ *   false = explicit deny
+ */
 export const memberPermissionOverrides = pgTable(
   'member_permission_overrides',
   {
@@ -40,17 +44,17 @@ export const memberPermissionOverrides = pgTable(
       'mpo_at_least_one',
       sql`${t.canRead} IS NOT NULL OR ${t.canWrite} IS NOT NULL OR ${t.canDelete} IS NOT NULL OR ${t.canExport} IS NOT NULL`,
     ),
-    writeCoherent: check(
-      'mpo_write_coherent',
-      sql`NOT (${t.canWrite}  IS TRUE AND ${t.canRead} IS FALSE)`,
+    writeImpliesNotDeniedRead: check(
+      'mpo_write_implies_read',
+      sql`${t.canWrite}  IS NULL OR ${t.canWrite}  IS FALSE OR ${t.canRead} IS NOT FALSE`,
     ),
-    deleteCoherent: check(
-      'mpo_delete_coherent',
-      sql`NOT (${t.canDelete} IS TRUE AND ${t.canRead} IS FALSE)`,
+    deleteImpliesNotDeniedRead: check(
+      'mpo_delete_implies_read',
+      sql`${t.canDelete} IS NULL OR ${t.canDelete} IS FALSE OR ${t.canRead} IS NOT FALSE`,
     ),
-    exportCoherent: check(
-      'mpo_export_coherent',
-      sql`NOT (${t.canExport} IS TRUE AND ${t.canRead} IS FALSE)`,
+    exportImpliesNotDeniedRead: check(
+      'mpo_export_implies_read',
+      sql`${t.canExport} IS NULL OR ${t.canExport} IS FALSE OR ${t.canRead} IS NOT FALSE`,
     ),
     moduleIdx: index('idx_mpo_module').on(t.module),
   }),

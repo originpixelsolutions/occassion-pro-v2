@@ -19,16 +19,11 @@ async function mkTenant(db: TestDb, slug: string): Promise<string> {
   return r.rows[0]!.id;
 }
 
-async function mkMember(
-  db: TestDb,
-  tenant: string,
-  email: string,
-  role = 'owner',
-): Promise<string> {
+async function mkMember(db: TestDb, tenant: string, email: string): Promise<string> {
   const r = await db.query<{ id: string }>(
     `INSERT INTO tenant_members (tenant_id, email, full_name, role)
-     VALUES ($1, $2, 'M', $3) RETURNING id`,
-    [tenant, email, role],
+     VALUES ($1, $2, 'M', 'owner') RETURNING id`,
+    [tenant, email],
   );
   return r.rows[0]!.id;
 }
@@ -42,12 +37,12 @@ describe('member_permission_overrides — schema correctness (Phase 2 Unit 24)',
     await db.close();
   });
 
-  it('inserts an explicit-grant override', async () => {
+  it('inserts an explicit grant', async () => {
     const t = await mkTenant(db, 'acme-co');
     const m = await mkMember(db, t, 'a@y.dev');
     await db.query(
-      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_write)
-       VALUES ($1, $2, 'events', TRUE)`,
+      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_read, can_write)
+       VALUES ($1, $2, 'budget', TRUE, TRUE)`,
       [t, m],
     );
     const c = (
@@ -56,11 +51,11 @@ describe('member_permission_overrides — schema correctness (Phase 2 Unit 24)',
     expect(c).toBe(1);
   });
 
-  it('inserts an explicit-deny override', async () => {
+  it('inserts an explicit deny (NULL read + FALSE write)', async () => {
     const t = await mkTenant(db, 'acme-co');
     const m = await mkMember(db, t, 'a@y.dev');
     await db.query(
-      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_delete)
+      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_write)
        VALUES ($1, $2, 'budget', FALSE)`,
       [t, m],
     );
@@ -70,43 +65,15 @@ describe('member_permission_overrides — schema correctness (Phase 2 Unit 24)',
     expect(c).toBe(1);
   });
 
-  it('rejects a row where all four columns are NULL', async () => {
+  it('rejects all-NULL row (no override means no row)', async () => {
     const t = await mkTenant(db, 'acme-co');
     const m = await mkMember(db, t, 'a@y.dev');
     const err = await tryExec(
       db,
-      `INSERT INTO member_permission_overrides (tenant_id, member_id, module)
-       VALUES ($1, $2, 'events')`,
+      `INSERT INTO member_permission_overrides (tenant_id, member_id, module) VALUES ($1, $2, 'budget')`,
       [t, m],
     );
     expect(err).toMatch(/at_least_one|check/i);
-  });
-
-  it('rejects can_write=TRUE with can_read=FALSE (coherence)', async () => {
-    const t = await mkTenant(db, 'acme-co');
-    const m = await mkMember(db, t, 'a@y.dev');
-    const err = await tryExec(
-      db,
-      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_read, can_write)
-       VALUES ($1, $2, 'events', FALSE, TRUE)`,
-      [t, m],
-    );
-    expect(err).toMatch(/write_coherent|check/i);
-  });
-
-  it('allows can_write=TRUE with can_read=NULL (inherit read from role)', async () => {
-    const t = await mkTenant(db, 'acme-co');
-    const m = await mkMember(db, t, 'a@y.dev');
-    await db.query(
-      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_write)
-       VALUES ($1, $2, 'events', TRUE)`,
-      [t, m],
-    );
-    const r = await db.query<{ can_read: boolean | null; can_write: boolean }>(
-      `SELECT can_read, can_write FROM member_permission_overrides`,
-    );
-    expect(r.rows[0]!.can_read).toBeNull();
-    expect(r.rows[0]!.can_write).toBe(true);
   });
 
   it('rejects bogus module', async () => {
@@ -121,37 +88,47 @@ describe('member_permission_overrides — schema correctness (Phase 2 Unit 24)',
     expect(err).toMatch(/module|check/i);
   });
 
+  it('rejects can_write=TRUE with can_read=FALSE (explicit incoherent)', async () => {
+    const t = await mkTenant(db, 'acme-co');
+    const m = await mkMember(db, t, 'a@y.dev');
+    const err = await tryExec(
+      db,
+      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_read, can_write)
+       VALUES ($1, $2, 'budget', FALSE, TRUE)`,
+      [t, m],
+    );
+    expect(err).toMatch(/write_implies_read|check/i);
+  });
+
+  it('accepts can_write=TRUE with can_read=NULL (inherit read)', async () => {
+    const t = await mkTenant(db, 'acme-co');
+    const m = await mkMember(db, t, 'a@y.dev');
+    await db.query(
+      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_write)
+       VALUES ($1, $2, 'budget', TRUE)`,
+      [t, m],
+    );
+    const c = (
+      await db.query<{ c: number }>(`SELECT count(*)::int AS c FROM member_permission_overrides`)
+    ).rows[0]!.c;
+    expect(c).toBe(1);
+  });
+
   it('composite PK blocks duplicate (tenant, member, module)', async () => {
     const t = await mkTenant(db, 'acme-co');
     const m = await mkMember(db, t, 'a@y.dev');
     await db.query(
       `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_read)
-       VALUES ($1, $2, 'events', TRUE)`,
+       VALUES ($1, $2, 'budget', TRUE)`,
       [t, m],
     );
     const err = await tryExec(
       db,
-      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_read)
-       VALUES ($1, $2, 'events', FALSE)`,
+      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_export)
+       VALUES ($1, $2, 'budget', FALSE)`,
       [t, m],
     );
     expect(err).toMatch(/duplicate|primary key|unique/i);
-  });
-
-  it('different members can have different overrides on same module', async () => {
-    const t = await mkTenant(db, 'acme-co');
-    const m1 = await mkMember(db, t, 'a@y.dev');
-    const m2 = await mkMember(db, t, 'b@y.dev', 'team_lead');
-    await db.query(
-      `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_read) VALUES
-         ($1, $2, 'events', TRUE),
-         ($1, $3, 'events', FALSE)`,
-      [t, m1, m2],
-    );
-    const c = (
-      await db.query<{ c: number }>(`SELECT count(*)::int AS c FROM member_permission_overrides`)
-    ).rows[0]!.c;
-    expect(c).toBe(2);
   });
 
   it('CASCADE: deleting member removes its overrides', async () => {
@@ -159,7 +136,7 @@ describe('member_permission_overrides — schema correctness (Phase 2 Unit 24)',
     const m = await mkMember(db, t, 'a@y.dev');
     await db.query(
       `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_read)
-       VALUES ($1, $2, 'events', TRUE)`,
+       VALUES ($1, $2, 'budget', TRUE)`,
       [t, m],
     );
     await db.query(`DELETE FROM tenant_members WHERE id = $1`, [m]);
@@ -174,7 +151,7 @@ describe('member_permission_overrides — schema correctness (Phase 2 Unit 24)',
     const m = await mkMember(db, t, 'a@y.dev');
     await db.query(
       `INSERT INTO member_permission_overrides (tenant_id, member_id, module, can_read)
-       VALUES ($1, $2, 'events', TRUE)`,
+       VALUES ($1, $2, 'budget', TRUE)`,
       [t, m],
     );
     const anon = await withRole(

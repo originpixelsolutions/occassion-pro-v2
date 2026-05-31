@@ -1,6 +1,8 @@
 -- Phase 2 Unit 24: member_permission_overrides (spec 2.4).
--- Per-member nullable override matrix layered on top of module_permissions.
--- NULL = inherit role-level value; TRUE/FALSE = explicit grant/deny.
+-- Per-member NULLABLE override on top of module_permissions.
+-- NULL  = inherit role default.
+-- TRUE  = explicit grant.
+-- FALSE = explicit deny.
 
 CREATE TABLE member_permission_overrides (
   tenant_id  uuid        NOT NULL REFERENCES tenants (id) ON DELETE CASCADE,
@@ -19,21 +21,15 @@ CREATE TABLE member_permission_overrides (
   updated_at timestamptz NOT NULL DEFAULT now(),
   updated_by uuid        REFERENCES tenant_members (id) ON DELETE SET NULL,
   PRIMARY KEY (tenant_id, member_id, module),
-  CHECK (
-    can_read   IS NOT NULL
-    OR can_write  IS NOT NULL
-    OR can_delete IS NOT NULL
-    OR can_export IS NOT NULL
-  ),
-  CHECK (NOT (can_write  IS TRUE AND can_read IS FALSE)),
-  CHECK (NOT (can_delete IS TRUE AND can_read IS FALSE)),
-  CHECK (NOT (can_export IS TRUE AND can_read IS FALSE))
+  CHECK (can_read IS NOT NULL OR can_write IS NOT NULL OR can_delete IS NOT NULL OR can_export IS NOT NULL),
+  CHECK (can_write  IS NULL OR can_write  IS FALSE OR can_read  IS NOT FALSE),
+  CHECK (can_delete IS NULL OR can_delete IS FALSE OR can_read  IS NOT FALSE),
+  CHECK (can_export IS NULL OR can_export IS FALSE OR can_read  IS NOT FALSE)
 );
 
-CREATE INDEX idx_mpo_tenant     ON member_permission_overrides (tenant_id);
-CREATE INDEX idx_mpo_member     ON member_permission_overrides (member_id);
-CREATE INDEX idx_mpo_module     ON member_permission_overrides (module);
-CREATE INDEX idx_mpo_updated_by ON member_permission_overrides (updated_by) WHERE updated_by IS NOT NULL;
+CREATE INDEX idx_mpo_tenant_member ON member_permission_overrides (tenant_id, member_id);
+CREATE INDEX idx_mpo_module        ON member_permission_overrides (module);
+CREATE INDEX idx_mpo_updated_by    ON member_permission_overrides (updated_by) WHERE updated_by IS NOT NULL;
 
 ALTER TABLE member_permission_overrides ENABLE ROW LEVEL SECURITY;
 ALTER TABLE member_permission_overrides FORCE ROW LEVEL SECURITY;
