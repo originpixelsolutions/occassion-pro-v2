@@ -3,9 +3,7 @@ import { check, customType, index, pgTable, text, timestamp, uuid } from 'drizzl
 import { tenantMembers } from './tenant-members.js';
 
 const bytea = customType<{ data: Uint8Array; driverData: Buffer }>({
-  dataType() {
-    return 'bytea';
-  },
+  dataType() { return 'bytea'; },
 });
 
 export const CALENDAR_PROVIDERS = ['google_calendar', 'outlook', 'apple_calendar'] as const;
@@ -20,26 +18,17 @@ export type CalendarStatus = (typeof CALENDAR_STATUSES)[number];
 export const tenantMemberExternalCalendars = pgTable(
   'tenant_member_external_calendars',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    memberId: uuid('member_id')
-      .notNull()
-      .references(() => tenantMembers.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    memberId: uuid('member_id').notNull().references(() => tenantMembers.id, { onDelete: 'cascade' }),
     provider: text('provider').$type<CalendarProvider>().notNull(),
     accessTokenEncrypted: bytea('access_token_encrypted').notNull(),
     refreshTokenEncrypted: bytea('refresh_token_encrypted'),
     tokenExpiresAt: timestamp('token_expires_at', { withTimezone: true }),
     calendarId: text('calendar_id'),
-    syncDirection: text('sync_direction')
-      .$type<CalendarSyncDirection>()
-      .notNull()
-      .default('two_way'),
+    syncDirection: text('sync_direction').$type<CalendarSyncDirection>().notNull().default('two_way'),
     status: text('status').$type<CalendarStatus>().notNull().default('active'),
     lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     providerEnum: check(

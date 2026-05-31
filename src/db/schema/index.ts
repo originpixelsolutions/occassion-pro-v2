@@ -40,3 +40,4 @@ export * from './tenant-sheets-syncs.js';
 export * from './tenant-messaging-integrations.js';
 export * from './tenant-oauth-apps.js';
 export * from './tenant-member-external-calendars.js';
+export * from './module-permissions.js';
