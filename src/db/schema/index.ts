@@ -18,3 +18,4 @@ export * from './currency-rates.js';
 export * from './whatsapp-templates.js';
 export * from './security-monitoring.js';
 export * from './help-content.js';
+export * from './tenants.js';
