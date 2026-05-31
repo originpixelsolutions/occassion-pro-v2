@@ -49,3 +49,4 @@ export * from './auth-sessions.js';
 export * from './email-daily-quota.js';
 export * from './oauth-provider-links.js';
 export * from './magic-links.js';
+export * from './account-recovery-codes.js';

@@ -3,20 +3,14 @@ import { check, index, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizz
 import { citext } from '../columns.js';
 
 export const MAGIC_LINK_USER_TYPES = [
-  'tenant_member',
-  'super_admin',
-  'client',
-  'vendor',
-  'speaker',
+  'tenant_member', 'super_admin', 'client', 'vendor', 'speaker',
 ] as const;
 export type MagicLinkUserType = (typeof MAGIC_LINK_USER_TYPES)[number];
 
 export const magicLinks = pgTable(
   'magic_links',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     userId: uuid('user_id').notNull(),
     userType: text('user_type').$type<MagicLinkUserType>().notNull(),
     email: citext('email').notNull(),
@@ -27,9 +21,7 @@ export const magicLinks = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     consumedAt: timestamp('consumed_at', { withTimezone: true }),
     consumedIp: text('consumed_ip'), // SQL type inet
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     tokenHashUq: uniqueIndex('magic_links_token_hash_key').on(t.tokenHash),
