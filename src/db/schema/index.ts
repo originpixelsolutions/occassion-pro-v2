@@ -26,3 +26,4 @@ export * from './tenant-slug-aliases.js';
 export * from './tenant-feature-overrides.js';
 export * from './tenant-api-keys.js';
 export * from './tenant-custom-domains.js';
+export * from './tenant-external-storage.js';

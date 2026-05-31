@@ -25,9 +25,7 @@ export type CustomDomainStatus = (typeof CUSTOM_DOMAIN_STATUSES)[number];
 export const tenantCustomDomains = pgTable(
   'tenant_custom_domains',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     tenantId: uuid('tenant_id')
       .notNull()
       .references(() => tenants.id, { onDelete: 'cascade' }),
@@ -39,9 +37,7 @@ export const tenantCustomDomains = pgTable(
     approvedAt: timestamp('approved_at', { withTimezone: true }),
     sslProvisionedAt: timestamp('ssl_provisioned_at', { withTimezone: true }),
     status: text('status').$type<CustomDomainStatus>().notNull().default('pending_dns'),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     domainUq: uniqueIndex('tenant_custom_domains_domain_key').on(t.domain),
