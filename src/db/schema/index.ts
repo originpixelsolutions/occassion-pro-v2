@@ -19,3 +19,4 @@ export * from './whatsapp-templates.js';
 export * from './security-monitoring.js';
 export * from './help-content.js';
 export * from './tenants.js';
+export * from './tenant-members.js';
