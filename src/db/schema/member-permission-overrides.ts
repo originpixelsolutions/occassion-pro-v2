@@ -1,14 +1,5 @@
 import { sql } from 'drizzle-orm';
-import {
-  boolean,
-  check,
-  index,
-  pgTable,
-  primaryKey,
-  text,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { boolean, check, index, pgTable, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 import { tenantMembers } from './tenant-members.js';
 import type { PermissionModule } from './module-permissions.js';
@@ -22,20 +13,14 @@ import type { PermissionModule } from './module-permissions.js';
 export const memberPermissionOverrides = pgTable(
   'member_permission_overrides',
   {
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
-    memberId: uuid('member_id')
-      .notNull()
-      .references(() => tenantMembers.id, { onDelete: 'cascade' }),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    memberId: uuid('member_id').notNull().references(() => tenantMembers.id, { onDelete: 'cascade' }),
     module: text('module').$type<PermissionModule>().notNull(),
     canRead: boolean('can_read'),
     canWrite: boolean('can_write'),
     canDelete: boolean('can_delete'),
     canExport: boolean('can_export'),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
     updatedBy: uuid('updated_by').references(() => tenantMembers.id, { onDelete: 'set null' }),
   },
   (t) => ({

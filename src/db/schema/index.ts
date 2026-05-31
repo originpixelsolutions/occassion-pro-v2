@@ -42,3 +42,4 @@ export * from './tenant-oauth-apps.js';
 export * from './tenant-member-external-calendars.js';
 export * from './module-permissions.js';
 export * from './member-permission-overrides.js';
+export * from './team-invitations.js';
