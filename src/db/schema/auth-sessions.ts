@@ -3,43 +3,25 @@ import { check, index, pgTable, text, timestamp, uuid, varchar } from 'drizzle-o
 import { tenants } from './tenants.js';
 
 export const SESSION_USER_TYPES = [
-  'tenant_member',
-  'super_admin',
-  'client',
-  'vendor',
-  'guest',
-  'speaker',
+  'tenant_member','super_admin','client','vendor','guest','speaker',
 ] as const;
 export type SessionUserType = (typeof SESSION_USER_TYPES)[number];
 
 export const SESSION_PORTALS = [
-  'admin',
-  'tenant',
-  'client',
-  'vendor',
-  'guest',
-  'speaker',
-  'super_admin',
+  'admin','tenant','client','vendor','guest','speaker','super_admin',
 ] as const;
 export type SessionPortal = (typeof SESSION_PORTALS)[number];
 
 export const REVOKE_REASONS = [
-  'user_logout',
-  'admin_revoke',
-  'concurrent_limit',
-  'suspicious',
-  'password_change',
-  'refresh_rotation',
-  'mfa_revoke',
+  'user_logout','admin_revoke','concurrent_limit','suspicious',
+  'password_change','refresh_rotation','mfa_revoke',
 ] as const;
 export type RevokeReason = (typeof REVOKE_REASONS)[number];
 
 export const authSessions = pgTable(
   'auth_sessions',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     userId: uuid('user_id').notNull(),
     userType: text('user_type').$type<SessionUserType>().notNull(),
     tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
@@ -53,15 +35,11 @@ export const authSessions = pgTable(
     ipAddress: text('ip_address'), // SQL type inet
     ipCountry: varchar('ip_country', { length: 2 }),
     userAgent: text('user_agent'),
-    lastSeenAt: timestamp('last_seen_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().default(sql`now()`),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
     revokeReason: text('revoke_reason').$type<RevokeReason>(),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     userTypeEnum: check(
