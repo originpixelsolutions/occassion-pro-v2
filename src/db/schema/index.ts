@@ -36,3 +36,4 @@ export * from './tenant-transfer-requests.js';
 export * from './tenant-sso-config.js';
 export * from './tenant-crm-integrations.js';
 export * from './tenant-accounting-integrations.js';
+export * from './tenant-sheets-syncs.js';
