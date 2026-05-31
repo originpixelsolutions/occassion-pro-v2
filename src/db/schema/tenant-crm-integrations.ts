@@ -12,35 +12,23 @@ import {
 import { tenants } from './tenants.js';
 
 const bytea = customType<{ data: Uint8Array; driverData: Buffer }>({
-  dataType() {
-    return 'bytea';
-  },
+  dataType() { return 'bytea'; },
 });
 
-export const CRM_PROVIDERS = [
-  'salesforce',
-  'hubspot',
-  'zoho_crm',
-  'pipedrive',
-  'freshsales',
-] as const;
+export const CRM_PROVIDERS = ['salesforce','hubspot','zoho_crm','pipedrive','freshsales'] as const;
 export type CrmProvider = (typeof CRM_PROVIDERS)[number];
 
-export const CRM_SYNC_DIRECTIONS = ['to_crm', 'from_crm', 'two_way'] as const;
+export const CRM_SYNC_DIRECTIONS = ['to_crm','from_crm','two_way'] as const;
 export type CrmSyncDirection = (typeof CRM_SYNC_DIRECTIONS)[number];
 
-export const CRM_STATUSES = ['active', 'expired', 'disconnected', 'error'] as const;
+export const CRM_STATUSES = ['active','expired','disconnected','error'] as const;
 export type CrmIntegrationStatus = (typeof CRM_STATUSES)[number];
 
 export const tenantCrmIntegrations = pgTable(
   'tenant_crm_integrations',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
     provider: text('provider').$type<CrmProvider>().notNull(),
     accessTokenEncrypted: bytea('access_token_encrypted').notNull(),
     refreshTokenEncrypted: bytea('refresh_token_encrypted'),
@@ -50,9 +38,7 @@ export const tenantCrmIntegrations = pgTable(
     fieldMapping: jsonb('field_mapping').$type<Record<string, string>>().notNull(),
     lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
     status: text('status').$type<CrmIntegrationStatus>().notNull().default('active'),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     providerEnum: check(
