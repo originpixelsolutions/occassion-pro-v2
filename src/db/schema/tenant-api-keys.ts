@@ -1,5 +1,13 @@
 import { sql } from 'drizzle-orm';
-import { check, index, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import {
+  check,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 import { tenantMembers } from './tenant-members.js';
 
@@ -12,9 +20,7 @@ import { tenantMembers } from './tenant-members.js';
 export const tenantApiKeys = pgTable(
   'tenant_api_keys',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     tenantId: uuid('tenant_id')
       .notNull()
       .references(() => tenants.id, { onDelete: 'cascade' }),
@@ -29,9 +35,7 @@ export const tenantApiKeys = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true })
       .notNull()
       .default(sql`(now() + INTERVAL '365 days')`),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     nameLen: check('api_keys_name_len', sql`length(trim(${t.name})) BETWEEN 1 AND 120`),

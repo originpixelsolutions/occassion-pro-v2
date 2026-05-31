@@ -25,3 +25,4 @@ export * from './tenant-signup-attempts.js';
 export * from './tenant-slug-aliases.js';
 export * from './tenant-feature-overrides.js';
 export * from './tenant-api-keys.js';
+export * from './tenant-custom-domains.js';
