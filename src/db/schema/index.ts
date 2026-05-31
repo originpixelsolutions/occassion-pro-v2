@@ -21,3 +21,4 @@ export * from './help-content.js';
 export * from './tenants.js';
 export * from './tenant-members.js';
 export * from './tenant-subscriptions.js';
+export * from './tenant-signup-attempts.js';
