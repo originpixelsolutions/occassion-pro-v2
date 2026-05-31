@@ -42,9 +42,7 @@ export type StorageStatus = (typeof STORAGE_STATUSES)[number];
 export const tenantExternalStorage = pgTable(
   'tenant_external_storage',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     tenantId: uuid('tenant_id')
       .notNull()
       .references(() => tenants.id, { onDelete: 'cascade' }),
@@ -57,17 +55,21 @@ export const tenantExternalStorage = pgTable(
     isDefault: boolean('is_default').notNull().default(false),
     connectedBy: uuid('connected_by').references(() => tenantMembers.id, { onDelete: 'set null' }),
     status: text('status').$type<StorageStatus>().notNull().default('active'),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     providerEnum: check(
       'tes_provider',
       sql`${t.provider} IN ('google_drive','dropbox','onedrive','s3','r2','b2','wasabi')`,
     ),
-    statusEnum: check('tes_status', sql`${t.status} IN ('active','expired','disconnected')`),
-    tokenNonEmpty: check('tes_token_non_empty', sql`octet_length(${t.accessTokenEncrypted}) > 0`),
+    statusEnum: check(
+      'tes_status',
+      sql`${t.status} IN ('active','expired','disconnected')`,
+    ),
+    tokenNonEmpty: check(
+      'tes_token_non_empty',
+      sql`octet_length(${t.accessTokenEncrypted}) > 0`,
+    ),
     expiredConsistency: check(
       'tes_expired_consistency',
       sql`${t.status} <> 'expired' OR ${t.tokenExpiresAt} IS NOT NULL`,
