@@ -18,12 +18,8 @@ export type OauthAppStatus = (typeof OAUTH_APP_STATUSES)[number];
 export const tenantOauthApps = pgTable(
   'tenant_oauth_apps',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
     clientId: text('client_id').notNull(),
     clientSecretHash: text('client_secret_hash').notNull(),
     name: text('name').notNull(),
@@ -39,16 +35,15 @@ export const tenantOauthApps = pgTable(
     suspendedAt: timestamp('suspended_at', { withTimezone: true }),
     suspendedReason: text('suspended_reason'),
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     clientIdUq: uniqueIndex('tenant_oauth_apps_client_id_key').on(t.clientId),
-    clientIdFmt: check('toa_client_id_fmt', sql`${t.clientId} ~ '^op_app_[A-Za-z0-9]{16}$'`),
+    clientIdFmt: check(
+      'toa_client_id_fmt',
+      sql`${t.clientId} ~ '^op_app_[A-Za-z0-9]{16}$'`,
+    ),
     secretHashLen: check('toa_secret_hash_len', sql`length(${t.clientSecretHash}) = 64`),
     redirectsNonEmpty: check('toa_redirects_non_empty', sql`cardinality(${t.redirectUris}) >= 1`),
     scopesNonEmpty: check('toa_scopes_non_empty', sql`cardinality(${t.scopes}) >= 1`),
