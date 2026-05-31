@@ -30,3 +30,4 @@ export * from './tenant-external-storage.js';
 export * from './tenant-storage-addons.js';
 export * from './tenant-addons.js';
 export * from './tenant-payment-methods.js';
+export * from './tenant-invoice-recipients.js';
