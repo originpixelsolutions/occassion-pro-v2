@@ -8,16 +8,12 @@ export type OauthProvider = (typeof OAUTH_PROVIDERS)[number];
 export const oauthProviderLinks = pgTable(
   'oauth_provider_links',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     authUserId: uuid('auth_user_id').notNull(),
     provider: text('provider').$type<OauthProvider>().notNull(),
     providerUserId: text('provider_user_id').notNull(),
     providerEmail: citext('provider_email'),
-    linkedAt: timestamp('linked_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    linkedAt: timestamp('linked_at', { withTimezone: true }).notNull().default(sql`now()`),
     lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
   },
   (t) => ({
