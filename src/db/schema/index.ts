@@ -23,3 +23,4 @@ export * from './tenant-members.js';
 export * from './tenant-subscriptions.js';
 export * from './tenant-signup-attempts.js';
 export * from './tenant-slug-aliases.js';
+export * from './tenant-feature-overrides.js';
