@@ -67,3 +67,4 @@ export * from './event-subteams.js';
 export * from './event-subteam-members.js';
 export * from './event-type-readiness-items.js';
 export * from './event-readiness-state.js';
+export * from './event-edit-sessions.js';
