@@ -122,3 +122,4 @@ export * from './outgoing-webhook-deliveries.js';
 export * from './incoming-webhook-log.js';
 export * from './support-faqs.js';
 export * from './support-tickets.js';
+export * from './audit-log.js';
