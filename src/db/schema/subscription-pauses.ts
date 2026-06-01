@@ -6,24 +6,16 @@ import { tenantMembers } from './tenant-members.js';
 export const subscriptionPauses = pgTable(
   'subscription_pauses',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
-    pausedAt: timestamp('paused_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    pausedAt: timestamp('paused_at', { withTimezone: true }).notNull().default(sql`now()`),
     pauseResumeAt: timestamp('pause_resume_at', { withTimezone: true }).notNull(),
     reason: text('reason'),
     initiatedBy: uuid('initiated_by').references(() => tenantMembers.id, { onDelete: 'set null' }),
     resumedAt: timestamp('resumed_at', { withTimezone: true }),
     resumedBy: uuid('resumed_by').references(() => tenantMembers.id, { onDelete: 'set null' }),
     cancelledDuringPause: boolean('cancelled_during_pause').notNull().default(false),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     minDuration: check(
