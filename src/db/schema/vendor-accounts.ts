@@ -1,30 +1,15 @@
 import { sql } from 'drizzle-orm';
-import {
-  boolean,
-  check,
-  customType,
-  integer,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core';
+import { boolean, check, customType, integer, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
 import { citext } from '../columns.js';
 
 const bytea = customType<{ data: Uint8Array; driverData: Buffer }>({
-  dataType() {
-    return 'bytea';
-  },
+  dataType() { return 'bytea'; },
 });
 
 export const vendorAccounts = pgTable(
   'vendor_accounts',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     email: citext('email').notNull(),
     companyName: text('company_name'),
     contactName: text('contact_name'),
@@ -47,31 +32,15 @@ export const vendorAccounts = pgTable(
     emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
     purgeAfter: timestamp('purge_after', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     emailUq: uniqueIndex('vendor_accounts_email_key').on(t.email),
-    mfaCoupling: check(
-      'va_mfa_coupling',
-      sql`${t.mfaEnabled} = FALSE OR ${t.mfaSecret} IS NOT NULL`,
-    ),
-    suspendCoupling: check(
-      'va_suspend_coupling',
-      sql`${t.suspendedAt} IS NULL OR ${t.suspendedReason} IS NOT NULL`,
-    ),
-    bankCoupling: check(
-      'va_bank_coupling',
-      sql`(${t.bankAccountEncrypted} IS NULL) = (${t.bankKmsKeyId} IS NULL)`,
-    ),
-    currencyFmt: check(
-      'va_currency_fmt',
-      sql`${t.defaultCurrency} IS NULL OR ${t.defaultCurrency} ~ '^[A-Z]{3}$'`,
-    ),
+    mfaCoupling: check('va_mfa_coupling', sql`${t.mfaEnabled} = FALSE OR ${t.mfaSecret} IS NOT NULL`),
+    suspendCoupling: check('va_suspend_coupling', sql`${t.suspendedAt} IS NULL OR ${t.suspendedReason} IS NOT NULL`),
+    bankCoupling: check('va_bank_coupling', sql`(${t.bankAccountEncrypted} IS NULL) = (${t.bankKmsKeyId} IS NULL)`),
+    currencyFmt: check('va_currency_fmt', sql`${t.defaultCurrency} IS NULL OR ${t.defaultCurrency} ~ '^[A-Z]{3}$'`),
   }),
 );
 export type VendorAccount = typeof vendorAccounts.$inferSelect;

@@ -76,3 +76,4 @@ export * from './event-tickets.js';
 export * from './event-activity-feed.js';
 export * from './client-accounts.js';
 export * from './vendor-accounts.js';
+export * from './speaker-accounts.js';
