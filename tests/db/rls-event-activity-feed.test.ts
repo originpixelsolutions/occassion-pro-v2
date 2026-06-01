@@ -29,7 +29,7 @@ describe('RLS on event_activity_feed (Phase 12 Unit 79)', () => {
   beforeEach(async () => { db = await setupTestDb(); });
   afterEach(async () => { await db.close(); });
 
-  it('member can INSERT own entry', async () => {
+  it('member can append own activity', async () => {
     const t = await mkTenant(db, 'eaf-aaa');
     const e = await mkEvent(db, t, 'e-a');
     const u = '00000000-0000-0000-0000-000000001200';
@@ -38,12 +38,12 @@ describe('RLS on event_activity_feed (Phase 12 Unit 79)', () => {
     await asRole(db, 'authenticated');
     await db.query(
       `INSERT INTO event_activity_feed (tenant_id, event_id, actor_id, actor_type, activity_type, description, is_internal)
-       VALUES ($1, $2, $3, 'tenant_member', 'task_updated', 'Edited a task', FALSE)`, [t, e, u]);
+       VALUES ($1, $2, $3, 'tenant_member', 'task_added', 'Created decor task', FALSE)`, [t, e, u]);
     await asSuperuser(db);
     expect((await db.query<{ c: number }>(`SELECT count(*)::int AS c FROM event_activity_feed`)).rows[0]!.c).toBe(1);
   });
 
-  it('member cannot spoof actor_id', async () => {
+  it('member cannot spoof someone-else attribution', async () => {
     const t = await mkTenant(db, 'eaf-bbb');
     const e = await mkEvent(db, t, 'e-b');
     const me = '00000000-0000-0000-0000-000000001210';
@@ -55,7 +55,7 @@ describe('RLS on event_activity_feed (Phase 12 Unit 79)', () => {
     let err = '';
     try { await db.query(
       `INSERT INTO event_activity_feed (tenant_id, event_id, actor_id, actor_type, activity_type, description, is_internal)
-       VALUES ($1, $2, $3, 'tenant_member', 'task_updated', 'Spoofed', FALSE)`, [t, e, other]); }
+       VALUES ($1, $2, $3, 'tenant_member', 'task_added', 'X', FALSE)`, [t, e, other]); }
     catch (e2) { err = e2 instanceof Error ? e2.message : String(e2); }
     await asSuperuser(db);
     expect(err).toMatch(/row-level security|policy/i);
@@ -65,8 +65,8 @@ describe('RLS on event_activity_feed (Phase 12 Unit 79)', () => {
     const t = await mkTenant(db, 'eaf-ccc');
     const e = await mkEvent(db, t, 'e-c');
     await db.query(
-      `INSERT INTO event_activity_feed (tenant_id, event_id, actor_type, activity_type, description, is_internal)
-       VALUES ($1, $2, 'system', 'task_updated', 'sys', FALSE)`, [t, e]);
+      `INSERT INTO event_activity_feed (tenant_id, event_id, actor_id, actor_type, activity_type, description, is_internal)
+       VALUES ($1, $2, NULL, 'system', 'event_created', 'auto', FALSE)`, [t, e]);
     const n = await withRole(db, 'anon', async () =>
       (await db.query<{ id: string }>(`SELECT id FROM event_activity_feed`)).rows.length);
     expect(n).toBe(0);
@@ -78,8 +78,8 @@ describe('RLS on event_activity_feed (Phase 12 Unit 79)', () => {
     const u = '00000000-0000-0000-0000-000000001220';
     await mkMember(db, t, u, 'tm@y.dev', 'team_member');
     const id = (await db.query<{ id: string }>(
-      `INSERT INTO event_activity_feed (tenant_id, event_id, actor_type, activity_type, description, is_internal)
-       VALUES ($1, $2, 'system', 'task_updated', 'sys', FALSE) RETURNING id`, [t, e])).rows[0]!.id;
+      `INSERT INTO event_activity_feed (tenant_id, event_id, actor_id, actor_type, activity_type, description, is_internal)
+       VALUES ($1, $2, NULL, 'system', 'event_created', 'auto', FALSE) RETURNING id`, [t, e])).rows[0]!.id;
     await setCtx(db, u, 'tenant_member', t);
     await asRole(db, 'authenticated');
     const r = await db.query<{ c: number }>(
