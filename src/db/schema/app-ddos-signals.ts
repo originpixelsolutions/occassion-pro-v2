@@ -1,29 +1,14 @@
 import { sql } from 'drizzle-orm';
-import {
-  bigserial,
-  boolean,
-  check,
-  index,
-  integer,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core';
+import { bigserial, boolean, check, index, integer, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 
 export const DDOS_SIGNAL_TYPES = [
-  'rate_burst',
-  'pattern_attack',
-  'enumeration_attack',
-  'slow_loris',
-  'credential_stuffing',
-  'api_abuse',
+  'rate_burst','pattern_attack','enumeration_attack',
+  'slow_loris','credential_stuffing','api_abuse',
 ] as const;
 export type DdosSignalType = (typeof DDOS_SIGNAL_TYPES)[number];
 
-export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const;
+export const HTTP_METHODS = ['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS'] as const;
 export type HttpMethod = (typeof HTTP_METHODS)[number];
 
 export const appDdosSignals = pgTable(
@@ -39,9 +24,7 @@ export const appDdosSignals = pgTable(
     count: integer('count').notNull(),
     windowSeconds: integer('window_seconds'),
     userAgent: text('user_agent'),
-    detectedAt: timestamp('detected_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    detectedAt: timestamp('detected_at', { withTimezone: true }).notNull().default(sql`now()`),
     blocked: boolean('blocked').notNull().default(false),
     blockDurationSeconds: integer('block_duration_seconds'),
     notes: text('notes'),
