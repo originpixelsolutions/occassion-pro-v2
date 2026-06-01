@@ -85,3 +85,4 @@ export * from './rsvp-change-requests.js';
 export * from './vendor-event-assignments.js';
 export * from './sessions.js';
 export * from './speaker-event-assignments.js';
+export * from './invitations.js';
