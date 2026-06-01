@@ -1,30 +1,17 @@
 import { sql } from 'drizzle-orm';
-import {
-  check,
-  date,
-  index,
-  numeric,
-  pgTable,
-  timestamp,
-  uniqueIndex,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { check, date, index, numeric, pgTable, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { revenueRecognitionEntries } from './revenue-recognition-entries.js';
 
 export const revenueRecognitionMonthly = pgTable(
   'revenue_recognition_monthly',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     entryId: uuid('entry_id')
       .notNull()
       .references(() => revenueRecognitionEntries.id, { onDelete: 'cascade' }),
     recognitionMonth: date('recognition_month').notNull(),
     amountRecognized: numeric('amount_recognized', { precision: 14, scale: 2 }).notNull(),
-    recognizedAt: timestamp('recognized_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    recognizedAt: timestamp('recognized_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     entryMonthUq: uniqueIndex('revenue_recognition_monthly_entry_id_recognition_month_key').on(
