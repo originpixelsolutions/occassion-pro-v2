@@ -91,3 +91,4 @@ export * from './short-link-clicks.js';
 export * from './runsheet-tasks.js';
 export * from './runsheet-locks.js';
 export * from './runsheet-versions.js';
+export * from './inventory-items.js';
