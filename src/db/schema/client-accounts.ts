@@ -1,29 +1,15 @@
 import { sql } from 'drizzle-orm';
-import {
-  boolean,
-  check,
-  customType,
-  integer,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { boolean, check, customType, integer, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { citext } from '../columns.js';
 
 const bytea = customType<{ data: Uint8Array; driverData: Buffer }>({
-  dataType() {
-    return 'bytea';
-  },
+  dataType() { return 'bytea'; },
 });
 
 export const clientAccounts = pgTable(
   'client_accounts',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     email: citext('email').notNull(),
     fullName: text('full_name'),
     phone: text('phone'),
@@ -41,12 +27,8 @@ export const clientAccounts = pgTable(
     emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
     purgeAfter: timestamp('purge_after', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     emailUq: uniqueIndex('client_accounts_email_key').on(t.email),
@@ -54,14 +36,8 @@ export const clientAccounts = pgTable(
       'ca_email_fmt',
       sql`${t.email} ~ '^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$' AND length(${t.email}) <= 254`,
     ),
-    phoneFmt: check(
-      'ca_phone_fmt',
-      sql`${t.phone} IS NULL OR ${t.phone} ~ '^\\+[1-9][0-9]{6,14}$'`,
-    ),
-    passwordHashLen: check(
-      'ca_password_hash_len',
-      sql`length(${t.passwordHash}) BETWEEN 50 AND 200`,
-    ),
+    phoneFmt: check('ca_phone_fmt', sql`${t.phone} IS NULL OR ${t.phone} ~ '^\\+[1-9][0-9]{6,14}$'`),
+    passwordHashLen: check('ca_password_hash_len', sql`length(${t.passwordHash}) BETWEEN 50 AND 200`),
     mfaCoupling: check(
       'ca_mfa_coupling',
       sql`${t.mfaEnabled} = FALSE OR ${t.mfaSecret} IS NOT NULL`,
