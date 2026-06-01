@@ -5,30 +5,19 @@ import { oauthAuthorizationCodes } from './oauth-authorization-codes.js';
 import { tenants } from './tenants.js';
 
 export const OAT_USER_TYPES = [
-  'tenant_member',
-  'super_admin',
-  'client',
-  'vendor',
-  'speaker',
+  'tenant_member','super_admin','client','vendor','speaker',
 ] as const;
 export type OatUserType = (typeof OAT_USER_TYPES)[number];
 
 export const OAT_REVOKE_REASONS = [
-  'user_revoke',
-  'admin_revoke',
-  'rotation',
-  'expired',
-  'suspicious',
-  'app_revoke',
+  'user_revoke','admin_revoke','rotation','expired','suspicious','app_revoke',
 ] as const;
 export type OatRevokeReason = (typeof OAT_REVOKE_REASONS)[number];
 
 export const oauthAccessTokens = pgTable(
   'oauth_access_tokens',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     oauthAppId: uuid('oauth_app_id')
       .notNull()
       .references(() => tenantOauthApps.id, { onDelete: 'cascade' }),
@@ -49,9 +38,7 @@ export const oauthAccessTokens = pgTable(
     lastUsedIp: text('last_used_ip'), // SQL type inet
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
     revokeReason: text('revoke_reason').$type<OatRevokeReason>(),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     userTypeEnum: check(
