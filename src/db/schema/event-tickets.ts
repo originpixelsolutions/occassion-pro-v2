@@ -1,44 +1,20 @@
 import { sql } from 'drizzle-orm';
-import {
-  check,
-  index,
-  integer,
-  numeric,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core';
+import { check, index, integer, numeric, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 import { events } from './events.js';
 
 export const TICKET_TYPES = [
-  'general',
-  'vip',
-  'early_bird',
-  'student',
-  'press',
-  'staff',
-  'complimentary',
-  'sponsor',
-  'workshop',
-  'exhibitor',
+  'general','vip','early_bird','student','press','staff',
+  'complimentary','sponsor','workshop','exhibitor',
 ] as const;
 export type TicketType = (typeof TICKET_TYPES)[number];
 
 export const eventTickets = pgTable(
   'event_tickets',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
-    eventId: uuid('event_id')
-      .notNull()
-      .references(() => events.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    eventId: uuid('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
     ticketType: text('ticket_type').$type<TicketType>().notNull(),
     name: text('name').notNull(),
     description: text('description'),
@@ -55,12 +31,8 @@ export const eventTickets = pgTable(
     lateWindowEndsAt: timestamp('late_window_ends_at', { withTimezone: true }),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
     purgeAfter: timestamp('purge_after', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     typeEnum: check(
