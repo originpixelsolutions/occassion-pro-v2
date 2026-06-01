@@ -57,3 +57,4 @@ export * from './dunning-events.js';
 export * from './subscription-pauses.js';
 export * from './chargebacks.js';
 export * from './tenant-health-scores.js';
+export * from './tenant-cohort-metrics.js';

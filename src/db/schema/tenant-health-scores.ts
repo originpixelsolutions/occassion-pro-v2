@@ -1,14 +1,5 @@
 import { sql } from 'drizzle-orm';
-import {
-  check,
-  index,
-  integer,
-  numeric,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { check, index, integer, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 
 export const CHURN_RISK_LEVELS = ['low', 'medium', 'high', 'critical'] as const;
@@ -17,9 +8,7 @@ export type ChurnRiskLevel = (typeof CHURN_RISK_LEVELS)[number];
 export const tenantHealthScores = pgTable(
   'tenant_health_scores',
   {
-    tenantId: uuid('tenant_id')
-      .primaryKey()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
+    tenantId: uuid('tenant_id').primaryKey().references(() => tenants.id, { onDelete: 'cascade' }),
     overallScore: numeric('overall_score', { precision: 5, scale: 2 }),
     productEngagementScore: numeric('product_engagement_score', { precision: 5, scale: 2 }),
     teamEngagementScore: numeric('team_engagement_score', { precision: 5, scale: 2 }),
@@ -33,9 +22,7 @@ export const tenantHealthScores = pgTable(
     ticketCount30d: integer('ticket_count_30d'),
     failedPaymentCount: integer('failed_payment_count'),
     trialExtensionCount: integer('trial_extension_count'),
-    computedAt: timestamp('computed_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    computedAt: timestamp('computed_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     riskEnum: check(
