@@ -109,3 +109,4 @@ export * from './vendor-portfolios.js';
 export * from './vendor-reviews.js';
 export * from './invoices.js';
 export * from './payments.js';
+export * from './vendor-payouts.js';
