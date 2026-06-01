@@ -94,3 +94,4 @@ export * from './runsheet-versions.js';
 export * from './inventory-items.js';
 export * from './inventory-allocations.js';
 export * from './inventory-audits.js';
+export * from './floor-plans.js';
