@@ -80,3 +80,4 @@ export * from './speaker-accounts.js';
 export * from './guests.js';
 export * from './guest-otps.js';
 export * from './guest-refresh-tokens.js';
+export * from './guest-plus-ones.js';
