@@ -29,12 +29,8 @@ export interface EventWebsiteSeo {
 export const eventWebsites = pgTable(
   'event_websites',
   {
-    eventId: uuid('event_id')
-      .primaryKey()
-      .references(() => events.id, { onDelete: 'cascade' }),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
+    eventId: uuid('event_id').primaryKey().references(() => events.id, { onDelete: 'cascade' }),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
     isPublished: boolean('is_published').notNull().default(false),
     sections: jsonb('sections').$type<{ items: EventWebsiteSection[] }>().notNull(),
     themeConfig: jsonb('theme_config').$type<EventWebsiteTheme>(),
@@ -45,12 +41,8 @@ export const eventWebsites = pgTable(
     unpublishedAt: timestamp('unpublished_at', { withTimezone: true }),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
     purgeAfter: timestamp('purge_after', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     sectionsObject: check(
