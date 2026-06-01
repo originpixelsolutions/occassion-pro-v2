@@ -87,3 +87,4 @@ export * from './sessions.js';
 export * from './speaker-event-assignments.js';
 export * from './invitations.js';
 export * from './short-links.js';
+export * from './short-link-clicks.js';
