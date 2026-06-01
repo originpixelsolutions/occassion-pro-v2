@@ -14,14 +14,12 @@ export const OAT_USER_TYPES = [
 export type OatUserType = (typeof OAT_USER_TYPES)[number];
 
 export const OAT_REVOKE_REASONS = [
-  'user_logout',
+  'user_revoke',
   'admin_revoke',
-  'refresh_rotation',
-  'app_revoked',
-  'scope_change',
+  'rotation',
+  'expired',
   'suspicious',
-  'concurrent_limit',
-  'user_account_deleted',
+  'app_revoke',
 ] as const;
 export type OatRevokeReason = (typeof OAT_REVOKE_REASONS)[number];
 
@@ -36,9 +34,7 @@ export const oauthAccessTokens = pgTable(
       .references(() => tenantOauthApps.id, { onDelete: 'cascade' }),
     authorizationCodeId: uuid('authorization_code_id').references(
       () => oauthAuthorizationCodes.id,
-      {
-        onDelete: 'set null',
-      },
+      { onDelete: 'set null' },
     ),
     accessTokenHash: text('access_token_hash').notNull(),
     refreshTokenHash: text('refresh_token_hash'),
@@ -46,11 +42,11 @@ export const oauthAccessTokens = pgTable(
     userType: text('user_type').$type<OatUserType>().notNull(),
     tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
     scopes: text('scopes').array().notNull(),
-    ipAddress: text('ip_address'), // SQL type inet
-    userAgent: text('user_agent'),
+    tokenType: text('token_type').notNull().default('Bearer'),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     refreshExpiresAt: timestamp('refresh_expires_at', { withTimezone: true }),
     lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+    lastUsedIp: text('last_used_ip'), // SQL type inet
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
     revokeReason: text('revoke_reason').$type<OatRevokeReason>(),
     createdAt: timestamp('created_at', { withTimezone: true })
@@ -58,15 +54,19 @@ export const oauthAccessTokens = pgTable(
       .default(sql`now()`),
   },
   (t) => ({
-    accessHashLen: check('oat_access_hash_len', sql`length(${t.accessTokenHash}) = 64`),
     userTypeEnum: check(
       'oat_user_type',
       sql`${t.userType} IN ('tenant_member','super_admin','client','vendor','speaker')`,
     ),
+    accessHashLen: check('oat_access_hash_len', sql`length(${t.accessTokenHash}) = 64`),
     scopesNonEmpty: check('oat_scopes_non_empty', sql`cardinality(${t.scopes}) >= 1`),
-    expiresUnder90d: check(
-      'oat_expires_under_90d',
-      sql`${t.expiresAt} <= ${t.createdAt} + INTERVAL '90 days'`,
+    accessUnder24h: check(
+      'oat_access_under_24h',
+      sql`${t.expiresAt} <= ${t.createdAt} + INTERVAL '24 hours'`,
+    ),
+    refreshAfterAccess: check(
+      'oat_refresh_after_access',
+      sql`${t.refreshExpiresAt} IS NULL OR ${t.refreshExpiresAt} > ${t.expiresAt}`,
     ),
     refreshPair: check(
       'oat_refresh_pair',
