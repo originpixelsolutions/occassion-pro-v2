@@ -72,3 +72,4 @@ export * from './event-offload-jobs.js';
 export * from './event-websites.js';
 export * from './crew-pool.js';
 export * from './event-crew-assignments.js';
+export * from './event-tickets.js';

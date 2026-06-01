@@ -1,54 +1,27 @@
 import { sql } from 'drizzle-orm';
-import {
-  check,
-  index,
-  numeric,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core';
+import { check, index, numeric, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 import { events } from './events.js';
 import { crewPool } from './crew-pool.js';
 import { tenantMembers } from './tenant-members.js';
 
 export const CREW_ASSIGN_STATUSES = [
-  'scheduled',
-  'confirmed',
-  'checked_in',
-  'checked_out',
-  'no_show',
-  'cancelled',
+  'scheduled', 'confirmed', 'checked_in', 'checked_out', 'no_show', 'cancelled',
 ] as const;
 export type CrewAssignStatus = (typeof CREW_ASSIGN_STATUSES)[number];
 
 export const CREW_PAYMENT_METHODS = [
-  'cash',
-  'upi',
-  'bank_transfer',
-  'razorpay_x',
-  'stripe',
-  'other',
+  'cash','upi','bank_transfer','razorpay_x','stripe','other',
 ] as const;
 export type CrewPaymentMethod = (typeof CREW_PAYMENT_METHODS)[number];
 
 export const eventCrewAssignments = pgTable(
   'event_crew_assignments',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
-    eventId: uuid('event_id')
-      .notNull()
-      .references(() => events.id, { onDelete: 'cascade' }),
-    crewId: uuid('crew_id')
-      .notNull()
-      .references(() => crewPool.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    eventId: uuid('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
+    crewId: uuid('crew_id').notNull().references(() => crewPool.id, { onDelete: 'cascade' }),
     roleOnEvent: text('role_on_event'),
     shiftStart: timestamp('shift_start', { withTimezone: true }).notNull(),
     shiftEnd: timestamp('shift_end', { withTimezone: true }).notNull(),
@@ -66,12 +39,8 @@ export const eventCrewAssignments = pgTable(
     cancelledReason: text('cancelled_reason'),
     notes: text('notes'),
     assignedBy: uuid('assigned_by').references(() => tenantMembers.id, { onDelete: 'set null' }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     statusEnum: check(
