@@ -1,13 +1,5 @@
 import { sql } from 'drizzle-orm';
-import {
-  check,
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { check, index, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { citext } from '../columns.js';
 import { tenants } from './tenants.js';
 import { events } from './events.js';
@@ -16,15 +8,9 @@ import { tenantMembers } from './tenant-members.js';
 export const guests = pgTable(
   'guests',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
-    eventId: uuid('event_id')
-      .notNull()
-      .references(() => events.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    eventId: uuid('event_id').notNull().references(() => events.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     email: citext('email'),
     phone: text('phone'),
@@ -49,12 +35,8 @@ export const guests = pgTable(
     erasedReason: text('erased_reason'),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
     purgeAfter: timestamp('purge_after', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     emailPerEvent: uniqueIndex('idx_guests_email_per_event')
@@ -63,9 +45,7 @@ export const guests = pgTable(
     phonePerEvent: uniqueIndex('idx_guests_phone_per_event')
       .on(t.eventId, t.phone)
       .where(sql`${t.phone} IS NOT NULL AND ${t.deletedAt} IS NULL`),
-    eventIx: index('idx_guests_event')
-      .on(t.eventId)
-      .where(sql`${t.deletedAt} IS NULL`),
+    eventIx: index('idx_guests_event').on(t.eventId).where(sql`${t.deletedAt} IS NULL`),
     rsvpEnum: check(
       'g_rsvp_status',
       sql`${t.rsvpStatus} IN ('pending','attending','not_attending','tentative')`,

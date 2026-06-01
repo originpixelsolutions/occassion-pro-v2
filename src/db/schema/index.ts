@@ -78,3 +78,4 @@ export * from './client-accounts.js';
 export * from './vendor-accounts.js';
 export * from './speaker-accounts.js';
 export * from './guests.js';
+export * from './guest-otps.js';
