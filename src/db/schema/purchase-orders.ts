@@ -1,47 +1,25 @@
 import { sql } from 'drizzle-orm';
-import {
-  check,
-  date,
-  index,
-  numeric,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core';
+import { check, date, index, numeric, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 import { superAdmins } from './super-admins.js';
 
 export const PO_STATUSES = [
-  'pending_review',
-  'approved',
-  'active',
-  'exhausted',
-  'expired',
-  'cancelled',
+  'pending_review', 'approved', 'active', 'exhausted', 'expired', 'cancelled',
 ] as const;
 export type PoStatus = (typeof PO_STATUSES)[number];
 
 export const purchaseOrders = pgTable(
   'purchase_orders',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
     poNumber: text('po_number').notNull(),
     poAmount: numeric('po_amount', { precision: 14, scale: 2 }).notNull(),
     poCurrency: varchar('po_currency', { length: 3 }).notNull(),
     poIssuedDate: date('po_issued_date'),
     poExpiresDate: date('po_expires_date'),
     poDocumentUrl: text('po_document_url'),
-    approvedByAdmin: uuid('approved_by_admin').references(() => superAdmins.id, {
-      onDelete: 'set null',
-    }),
+    approvedByAdmin: uuid('approved_by_admin').references(() => superAdmins.id, { onDelete: 'set null' }),
     approvedAt: timestamp('approved_at', { withTimezone: true }),
     status: text('status').$type<PoStatus>().notNull().default('pending_review'),
     amountConsumed: numeric('amount_consumed', { precision: 14, scale: 2 }).notNull().default('0'),
@@ -49,9 +27,7 @@ export const purchaseOrders = pgTable(
     cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
     cancelledBy: uuid('cancelled_by').references(() => superAdmins.id, { onDelete: 'set null' }),
     cancelledReason: text('cancelled_reason'),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     tenantPoUq: uniqueIndex('purchase_orders_tenant_id_po_number_key').on(t.tenantId, t.poNumber),
