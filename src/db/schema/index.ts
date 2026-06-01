@@ -74,3 +74,4 @@ export * from './crew-pool.js';
 export * from './event-crew-assignments.js';
 export * from './event-tickets.js';
 export * from './event-activity-feed.js';
+export * from './client-accounts.js';
