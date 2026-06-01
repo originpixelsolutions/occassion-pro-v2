@@ -24,65 +24,66 @@ async function setCtx(db: TestDb, uid: string | null, userType: string | null, t
   await db.query(`SELECT set_config('app.tenant_id', $1, false)`, [tenantId ?? '']);
 }
 
-describe('RLS on runsheet_versions (Phase 12 Unit 78)', () => {
+describe('RLS on event_activity_feed (Phase 12 Unit 79)', () => {
   let db: TestDb;
   beforeEach(async () => { db = await setupTestDb(); });
   afterEach(async () => { await db.close(); });
 
-  it('member can INSERT own snapshot', async () => {
-    const t = await mkTenant(db, 'rv-aaa');
+  it('member can INSERT own entry', async () => {
+    const t = await mkTenant(db, 'eaf-aaa');
     const e = await mkEvent(db, t, 'e-a');
-    const u = '00000000-0000-0000-0000-000000001100';
+    const u = '00000000-0000-0000-0000-000000001200';
     await mkMember(db, t, u, 'm@y.dev', 'team_member');
     await setCtx(db, u, 'tenant_member', t);
     await asRole(db, 'authenticated');
     await db.query(
-      `INSERT INTO runsheet_versions (tenant_id, event_id, is_full, snapshot, task_count, created_by)
-       VALUES ($1, $2, TRUE, '{}'::jsonb, 0, $3)`, [t, e, u]);
+      `INSERT INTO event_activity_feed (tenant_id, event_id, actor_id, actor_type, activity_type, description, is_internal)
+       VALUES ($1, $2, $3, 'tenant_member', 'task_updated', 'Edited a task', FALSE)`, [t, e, u]);
     await asSuperuser(db);
-    expect((await db.query<{ c: number }>(`SELECT count(*)::int AS c FROM runsheet_versions`)).rows[0]!.c).toBe(1);
+    expect((await db.query<{ c: number }>(`SELECT count(*)::int AS c FROM event_activity_feed`)).rows[0]!.c).toBe(1);
   });
 
-  it('member cannot INSERT with someone-else attribution', async () => {
-    const t = await mkTenant(db, 'rv-bbb');
+  it('member cannot spoof actor_id', async () => {
+    const t = await mkTenant(db, 'eaf-bbb');
     const e = await mkEvent(db, t, 'e-b');
-    const me = '00000000-0000-0000-0000-000000001110';
-    const other = '00000000-0000-0000-0000-000000001111';
+    const me = '00000000-0000-0000-0000-000000001210';
+    const other = '00000000-0000-0000-0000-000000001211';
     await mkMember(db, t, me, 'me@y.dev', 'team_member');
     await mkMember(db, t, other, 'ot@y.dev', 'team_member');
     await setCtx(db, me, 'tenant_member', t);
     await asRole(db, 'authenticated');
     let err = '';
     try { await db.query(
-      `INSERT INTO runsheet_versions (tenant_id, event_id, is_full, snapshot, task_count, created_by)
-       VALUES ($1, $2, TRUE, '{}'::jsonb, 0, $3)`, [t, e, other]); }
+      `INSERT INTO event_activity_feed (tenant_id, event_id, actor_id, actor_type, activity_type, description, is_internal)
+       VALUES ($1, $2, $3, 'tenant_member', 'task_updated', 'Spoofed', FALSE)`, [t, e, other]); }
     catch (e2) { err = e2 instanceof Error ? e2.message : String(e2); }
     await asSuperuser(db);
     expect(err).toMatch(/row-level security|policy/i);
   });
 
   it('anon sees zero', async () => {
-    const t = await mkTenant(db, 'rv-ccc');
+    const t = await mkTenant(db, 'eaf-ccc');
     const e = await mkEvent(db, t, 'e-c');
     await db.query(
-      `INSERT INTO runsheet_versions (tenant_id, event_id, is_full, snapshot, task_count) VALUES ($1, $2, TRUE, '{}'::jsonb, 0)`, [t, e]);
+      `INSERT INTO event_activity_feed (tenant_id, event_id, actor_type, activity_type, description, is_internal)
+       VALUES ($1, $2, 'system', 'task_updated', 'sys', FALSE)`, [t, e]);
     const n = await withRole(db, 'anon', async () =>
-      (await db.query<{ id: string }>(`SELECT id FROM runsheet_versions`)).rows.length);
+      (await db.query<{ id: string }>(`SELECT id FROM event_activity_feed`)).rows.length);
     expect(n).toBe(0);
   });
 
   it('team_member cannot DELETE', async () => {
-    const t = await mkTenant(db, 'rv-ddd');
+    const t = await mkTenant(db, 'eaf-ddd');
     const e = await mkEvent(db, t, 'e-d');
-    const u = '00000000-0000-0000-0000-000000001120';
+    const u = '00000000-0000-0000-0000-000000001220';
     await mkMember(db, t, u, 'tm@y.dev', 'team_member');
     const id = (await db.query<{ id: string }>(
-      `INSERT INTO runsheet_versions (tenant_id, event_id, is_full, snapshot, task_count) VALUES ($1, $2, TRUE, '{}'::jsonb, 0) RETURNING id`,
-      [t, e])).rows[0]!.id;
+      `INSERT INTO event_activity_feed (tenant_id, event_id, actor_type, activity_type, description, is_internal)
+       VALUES ($1, $2, 'system', 'task_updated', 'sys', FALSE) RETURNING id`, [t, e])).rows[0]!.id;
     await setCtx(db, u, 'tenant_member', t);
     await asRole(db, 'authenticated');
     const r = await db.query<{ c: number }>(
-      `WITH d AS (DELETE FROM runsheet_versions WHERE id=$1 RETURNING id) SELECT count(*)::int AS c FROM d`, [id]);
+      `WITH d AS (DELETE FROM event_activity_feed WHERE id=$1 RETURNING id) SELECT count(*)::int AS c FROM d`, [id]);
     await asSuperuser(db);
     expect(r.rows[0]!.c).toBe(0);
   });
