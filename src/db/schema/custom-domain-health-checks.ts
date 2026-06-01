@@ -1,22 +1,8 @@
 import { sql } from 'drizzle-orm';
-import {
-  bigserial,
-  check,
-  index,
-  integer,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { bigserial, check, index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 
-export const DOMAIN_CHECK_TYPES = [
-  'cname_intact',
-  'ssl_valid',
-  'content_served',
-  'orphaned',
-] as const;
+export const DOMAIN_CHECK_TYPES = ['cname_intact', 'ssl_valid', 'content_served', 'orphaned'] as const;
 export type DomainCheckType = (typeof DOMAIN_CHECK_TYPES)[number];
 
 export const DOMAIN_CHECK_STATUSES = ['healthy', 'warning', 'critical', 'orphaned'] as const;
@@ -35,9 +21,7 @@ export const customDomainHealthChecks = pgTable(
     latencyMs: integer('latency_ms'),
     sslExpiresAt: timestamp('ssl_expires_at', { withTimezone: true }),
     notes: text('notes'),
-    checkedAt: timestamp('checked_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    checkedAt: timestamp('checked_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     checkTypeEnum: check(
