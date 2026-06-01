@@ -54,3 +54,4 @@ export * from './purchase-orders.js';
 export * from './revenue-recognition-entries.js';
 export * from './revenue-recognition-monthly.js';
 export * from './dunning-events.js';
+export * from './subscription-pauses.js';
