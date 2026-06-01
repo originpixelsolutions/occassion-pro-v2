@@ -100,3 +100,4 @@ export * from './floor-plan-table-guests.js';
 export * from './vendor-quotes.js';
 export * from './client-documents.js';
 export * from './vendor-external-calendars.js';
+export * from './vendor-calendar-events.js';
