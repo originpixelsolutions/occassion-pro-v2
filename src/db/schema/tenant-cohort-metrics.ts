@@ -1,14 +1,5 @@
 import { sql } from 'drizzle-orm';
-import {
-  check,
-  date,
-  index,
-  integer,
-  numeric,
-  pgTable,
-  primaryKey,
-  timestamp,
-} from 'drizzle-orm/pg-core';
+import { check, date, index, integer, numeric, pgTable, primaryKey, timestamp } from 'drizzle-orm/pg-core';
 
 export const tenantCohortMetrics = pgTable(
   'tenant_cohort_metrics',
@@ -23,9 +14,7 @@ export const tenantCohortMetrics = pgTable(
     totalArr: numeric('total_arr', { precision: 14, scale: 2 }).notNull().default('0'),
     netRevenueRetention: numeric('net_revenue_retention', { precision: 5, scale: 2 }),
     grossRevenueRetention: numeric('gross_revenue_retention', { precision: 5, scale: 2 }),
-    computedAt: timestamp('computed_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    computedAt: timestamp('computed_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     pk: primaryKey({ columns: [t.cohortMonth, t.measurementMonth] }),
