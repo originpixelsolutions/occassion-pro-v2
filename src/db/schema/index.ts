@@ -98,3 +98,4 @@ export * from './floor-plans.js';
 export * from './floor-plan-tables.js';
 export * from './floor-plan-table-guests.js';
 export * from './vendor-quotes.js';
+export * from './client-documents.js';
