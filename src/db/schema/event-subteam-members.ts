@@ -14,9 +14,7 @@ export const eventSubteamMembers = pgTable(
       .references(() => tenantMembers.id, { onDelete: 'cascade' }),
     roleLabel: text('role_label'),
     addedBy: uuid('added_by').references(() => tenantMembers.id, { onDelete: 'set null' }),
-    addedAt: timestamp('added_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    addedAt: timestamp('added_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     pk: primaryKey({ columns: [t.subteamId, t.memberId] }),

@@ -4,10 +4,8 @@ import {
   uuid,
   text,
   boolean,
-  integer,
   interval,
   timestamp,
-  index,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
@@ -43,22 +41,3 @@ export const eventTypes = pgTable(
   }),
 );
 export type EventType = typeof eventTypes.$inferSelect;
-
-export const eventTypeReadinessItems = pgTable(
-  'event_type_readiness_items',
-  {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    eventTypeId: uuid('event_type_id')
-      .notNull()
-      .references(() => eventTypes.id, { onDelete: 'cascade' }),
-    label: text('label').notNull(),
-    module: text('module'),
-    checkQuery: text('check_query'),
-    weight: integer('weight').notNull().default(1),
-    sortOrder: integer('sort_order').notNull().default(0),
-  },
-  (t) => ({ typeIdx: index('idx_readiness_items_type').on(t.eventTypeId) }),
-);
-export type EventTypeReadinessItem = typeof eventTypeReadinessItems.$inferSelect;
