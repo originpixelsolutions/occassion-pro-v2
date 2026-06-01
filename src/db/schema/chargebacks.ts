@@ -1,37 +1,17 @@
 import { sql } from 'drizzle-orm';
-import {
-  check,
-  index,
-  jsonb,
-  numeric,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core';
+import { check, index, jsonb, numeric, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 
 export const CHARGEBACK_GATEWAYS = ['razorpay', 'stripe'] as const;
 export type ChargebackGateway = (typeof CHARGEBACK_GATEWAYS)[number];
 
 export const CHARGEBACK_STATUSES = [
-  'received',
-  'evidence_required',
-  'evidence_submitted',
-  'won',
-  'lost',
-  'accepted',
+  'received','evidence_required','evidence_submitted','won','lost','accepted',
 ] as const;
 export type ChargebackStatus = (typeof CHARGEBACK_STATUSES)[number];
 
 export const CHARGEBACK_ACCOUNT_ACTIONS = [
-  'none',
-  'warning',
-  'frozen',
-  'suspended',
-  'terminated',
+  'none','warning','frozen','suspended','terminated',
 ] as const;
 export type ChargebackAccountAction = (typeof CHARGEBACK_ACCOUNT_ACTIONS)[number];
 
@@ -46,12 +26,8 @@ export interface EvidenceFile {
 export const chargebacks = pgTable(
   'chargebacks',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
     paymentId: uuid('payment_id'), // FK added in Phase 6
     gateway: text('gateway').$type<ChargebackGateway>().notNull(),
     gatewayDisputeId: text('gateway_dispute_id').notNull(),
@@ -64,14 +40,9 @@ export const chargebacks = pgTable(
     evidenceSubmittedAt: timestamp('evidence_submitted_at', { withTimezone: true }),
     evidenceFiles: jsonb('evidence_files').$type<EvidenceFile[]>(),
     resolutionAt: timestamp('resolution_at', { withTimezone: true }),
-    accountAction: text('account_action')
-      .$type<ChargebackAccountAction>()
-      .notNull()
-      .default('none'),
+    accountAction: text('account_action').$type<ChargebackAccountAction>().notNull().default('none'),
     notes: text('notes'),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     gatewayDisputeUq: uniqueIndex('chargebacks_gateway_gateway_dispute_id_key').on(
