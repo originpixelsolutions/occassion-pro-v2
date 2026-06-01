@@ -1,57 +1,27 @@
 import { sql } from 'drizzle-orm';
-import {
-  bigint,
-  check,
-  index,
-  integer,
-  numeric,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core';
+import { bigint, check, index, integer, numeric, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.js';
 import { eventTypes } from './event-types.js';
 import { eventTemplates } from './event-templates.js';
 import { tenantMembers } from './tenant-members.js';
 
 export const EVENT_STATUSES = [
-  'planning',
-  'live',
-  'completed',
-  'cancelled',
-  'archived',
-  'offloaded',
-  'deleted_media',
-  'deleted',
+  'planning','live','completed','cancelled','archived',
+  'offloaded','deleted_media','deleted',
 ] as const;
 export type EventStatus = (typeof EVENT_STATUSES)[number];
 
 export const OFFLOAD_DESTINATIONS = [
-  'google_drive',
-  'dropbox',
-  'onedrive',
-  's3',
-  'r2',
-  'b2',
-  'wasabi',
+  'google_drive','dropbox','onedrive','s3','r2','b2','wasabi',
 ] as const;
 export type OffloadDestination = (typeof OFFLOAD_DESTINATIONS)[number];
 
 export const events = pgTable(
   'events',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
-    tenantId: uuid('tenant_id')
-      .notNull()
-      .references(() => tenants.id, { onDelete: 'cascade' }),
-    eventTypeId: uuid('event_type_id')
-      .notNull()
-      .references(() => eventTypes.id, { onDelete: 'restrict' }),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+    tenantId: uuid('tenant_id').notNull().references(() => tenants.id, { onDelete: 'cascade' }),
+    eventTypeId: uuid('event_type_id').notNull().references(() => eventTypes.id, { onDelete: 'restrict' }),
     templateId: uuid('template_id').references(() => eventTemplates.id, { onDelete: 'set null' }),
     code: text('code').notNull(),
     name: text('name').notNull(),
@@ -82,12 +52,8 @@ export const events = pgTable(
     offloadSizeBytes: bigint('offload_size_bytes', { mode: 'number' }),
     guestsAnonymizedAt: timestamp('guests_anonymized_at', { withTimezone: true }),
     createdBy: uuid('created_by').references(() => tenantMembers.id, { onDelete: 'set null' }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
-    updatedAt: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     tenantCodeUq: uniqueIndex('uq_events_tenant_code').on(t.tenantId, t.code),
