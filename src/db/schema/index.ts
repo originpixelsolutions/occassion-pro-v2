@@ -117,3 +117,4 @@ export * from './notifications.js';
 export * from './notification-deliveries.js';
 export * from './notification-preferences.js';
 export * from './onboarding-state.js';
+export * from './outgoing-webhook-subscriptions.js';
