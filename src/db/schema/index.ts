@@ -52,3 +52,4 @@ export * from './magic-links.js';
 export * from './account-recovery-codes.js';
 export * from './purchase-orders.js';
 export * from './revenue-recognition-entries.js';
+export * from './revenue-recognition-monthly.js';
