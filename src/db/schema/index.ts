@@ -101,3 +101,4 @@ export * from './vendor-quotes.js';
 export * from './client-documents.js';
 export * from './vendor-external-calendars.js';
 export * from './vendor-calendar-events.js';
+export * from './vendor-crew-members.js';
