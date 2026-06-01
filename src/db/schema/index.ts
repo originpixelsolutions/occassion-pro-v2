@@ -105,3 +105,4 @@ export * from './vendor-crew-members.js';
 export * from './vendor-crew-assignments.js';
 export * from './client-event-access.js';
 export * from './vendor-invoice-templates.js';
+export * from './vendor-portfolios.js';
