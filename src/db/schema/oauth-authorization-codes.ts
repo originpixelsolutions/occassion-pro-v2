@@ -4,11 +4,7 @@ import { tenantOauthApps } from './tenant-oauth-apps.js';
 import { tenants } from './tenants.js';
 
 export const OAC_USER_TYPES = [
-  'tenant_member',
-  'super_admin',
-  'client',
-  'vendor',
-  'speaker',
+  'tenant_member','super_admin','client','vendor','speaker',
 ] as const;
 export type OacUserType = (typeof OAC_USER_TYPES)[number];
 
@@ -18,9 +14,7 @@ export type PkceMethod = (typeof PKCE_METHODS)[number];
 export const oauthAuthorizationCodes = pgTable(
   'oauth_authorization_codes',
   {
-    id: uuid('id')
-      .primaryKey()
-      .default(sql`gen_random_uuid()`),
+    id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
     oauthAppId: uuid('oauth_app_id')
       .notNull()
       .references(() => tenantOauthApps.id, { onDelete: 'cascade' }),
@@ -37,9 +31,7 @@ export const oauthAuthorizationCodes = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     consumedAt: timestamp('consumed_at', { withTimezone: true }),
     consumedIp: text('consumed_ip'), // SQL type inet
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .default(sql`now()`),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().default(sql`now()`),
   },
   (t) => ({
     codeHashUq: uniqueIndex('oauth_authorization_codes_code_hash_key').on(t.codeHash),

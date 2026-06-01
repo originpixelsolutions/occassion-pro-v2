@@ -60,3 +60,4 @@ export * from './tenant-health-scores.js';
 export * from './tenant-cohort-metrics.js';
 export * from './app-ddos-signals.js';
 export * from './oauth-authorization-codes.js';
+export * from './oauth-access-tokens.js';
