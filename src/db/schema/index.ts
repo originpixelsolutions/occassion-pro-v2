@@ -121,3 +121,4 @@ export * from './outgoing-webhook-subscriptions.js';
 export * from './outgoing-webhook-deliveries.js';
 export * from './incoming-webhook-log.js';
 export * from './support-faqs.js';
+export * from './support-tickets.js';
