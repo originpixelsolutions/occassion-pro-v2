@@ -1,0 +1,10 @@
+DROP POLICY IF EXISTS owd_select_member       ON outgoing_webhook_deliveries;
+DROP POLICY IF EXISTS owd_select_super_admin  ON outgoing_webhook_deliveries;
+DROP POLICY IF EXISTS owd_insert_super_admin  ON outgoing_webhook_deliveries;
+DROP POLICY IF EXISTS owd_update_super_admin  ON outgoing_webhook_deliveries;
+DROP POLICY IF EXISTS owd_delete_super_admin  ON outgoing_webhook_deliveries;
+CREATE POLICY owd_select_member ON outgoing_webhook_deliveries FOR SELECT USING (is_tenant_member(tenant_id));
+CREATE POLICY owd_select_super_admin ON outgoing_webhook_deliveries FOR SELECT USING (is_super_admin());
+CREATE POLICY owd_insert_super_admin ON outgoing_webhook_deliveries FOR INSERT WITH CHECK (is_super_admin());
+CREATE POLICY owd_update_super_admin ON outgoing_webhook_deliveries FOR UPDATE USING (is_super_admin()) WITH CHECK (is_super_admin());
+CREATE POLICY owd_delete_super_admin ON outgoing_webhook_deliveries FOR DELETE USING (is_super_admin());

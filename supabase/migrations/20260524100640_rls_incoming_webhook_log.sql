@@ -1,0 +1,10 @@
+DROP POLICY IF EXISTS iwl_select_super_admin  ON incoming_webhook_log;
+DROP POLICY IF EXISTS iwl_insert_anon         ON incoming_webhook_log;
+DROP POLICY IF EXISTS iwl_insert_super_admin  ON incoming_webhook_log;
+DROP POLICY IF EXISTS iwl_update_super_admin  ON incoming_webhook_log;
+DROP POLICY IF EXISTS iwl_delete_super_admin  ON incoming_webhook_log;
+CREATE POLICY iwl_select_super_admin ON incoming_webhook_log FOR SELECT USING (is_super_admin());
+CREATE POLICY iwl_insert_anon ON incoming_webhook_log FOR INSERT WITH CHECK (TRUE);
+CREATE POLICY iwl_insert_super_admin ON incoming_webhook_log FOR INSERT WITH CHECK (is_super_admin());
+CREATE POLICY iwl_update_super_admin ON incoming_webhook_log FOR UPDATE USING (is_super_admin()) WITH CHECK (is_super_admin());
+CREATE POLICY iwl_delete_super_admin ON incoming_webhook_log FOR DELETE USING (is_super_admin());
