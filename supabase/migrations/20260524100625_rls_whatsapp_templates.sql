@@ -1,0 +1,10 @@
+DROP POLICY IF EXISTS wat_select_authenticated  ON whatsapp_templates;
+DROP POLICY IF EXISTS wat_select_super_admin    ON whatsapp_templates;
+DROP POLICY IF EXISTS wat_insert_super_admin    ON whatsapp_templates;
+DROP POLICY IF EXISTS wat_update_super_admin    ON whatsapp_templates;
+DROP POLICY IF EXISTS wat_delete_super_admin    ON whatsapp_templates;
+CREATE POLICY wat_select_authenticated ON whatsapp_templates FOR SELECT USING (is_authenticated());
+CREATE POLICY wat_select_super_admin ON whatsapp_templates FOR SELECT USING (is_super_admin());
+CREATE POLICY wat_insert_super_admin ON whatsapp_templates FOR INSERT WITH CHECK (is_super_admin());
+CREATE POLICY wat_update_super_admin ON whatsapp_templates FOR UPDATE USING (is_super_admin()) WITH CHECK (is_super_admin());
+CREATE POLICY wat_delete_super_admin ON whatsapp_templates FOR DELETE USING (is_super_admin());

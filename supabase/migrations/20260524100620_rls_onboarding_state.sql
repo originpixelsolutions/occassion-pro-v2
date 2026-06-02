@@ -1,0 +1,14 @@
+DROP POLICY IF EXISTS os_select_member       ON onboarding_state;
+DROP POLICY IF EXISTS os_select_super_admin  ON onboarding_state;
+DROP POLICY IF EXISTS os_insert_member       ON onboarding_state;
+DROP POLICY IF EXISTS os_insert_super_admin  ON onboarding_state;
+DROP POLICY IF EXISTS os_update_member       ON onboarding_state;
+DROP POLICY IF EXISTS os_update_super_admin  ON onboarding_state;
+DROP POLICY IF EXISTS os_delete_super_admin  ON onboarding_state;
+CREATE POLICY os_select_member ON onboarding_state FOR SELECT USING (is_tenant_member(tenant_id));
+CREATE POLICY os_select_super_admin ON onboarding_state FOR SELECT USING (is_super_admin());
+CREATE POLICY os_insert_member ON onboarding_state FOR INSERT WITH CHECK (is_tenant_member(tenant_id));
+CREATE POLICY os_insert_super_admin ON onboarding_state FOR INSERT WITH CHECK (is_super_admin());
+CREATE POLICY os_update_member ON onboarding_state FOR UPDATE USING (is_tenant_member(tenant_id)) WITH CHECK (is_tenant_member(tenant_id));
+CREATE POLICY os_update_super_admin ON onboarding_state FOR UPDATE USING (is_super_admin()) WITH CHECK (is_super_admin());
+CREATE POLICY os_delete_super_admin ON onboarding_state FOR DELETE USING (is_super_admin());
